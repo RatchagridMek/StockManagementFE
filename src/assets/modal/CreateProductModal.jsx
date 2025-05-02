@@ -1,0 +1,130 @@
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  MenuItem,
+  Grid,
+  Button,
+  IconButton,
+  Select,
+  InputLabel,
+  FormControl,
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+export default function CreateProductModal({ open, onClose, onSubmit }) {
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    category: '',
+    costPrice: '',
+    salePrice: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+        สร้างสินค้า
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: 'absolute', right: 16, top: 16 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent>
+        <Grid container spacing={2}>
+          {/* ชื่อสินค้า / รายละเอียด */}
+          <Grid item size={12}>
+            <TextField
+              fullWidth
+              name="name"
+              label="ชื่อสินค้า"
+              value={form.name}
+              onChange={handleChange}
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item size={12}>
+            <TextField
+              fullWidth
+              name="description"
+              label="รายละเอียดสินค้า"
+              value={form.description}
+              onChange={handleChange}
+              variant="outlined"
+            />
+          </Grid>
+
+          {/* หมวดหมู่สินค้า */}
+          <Grid item size={12}>
+            <FormControl fullWidth>
+              <InputLabel id="category-label">หมวดหมู่ของสินค้า</InputLabel>
+              <Select
+                labelId="category-label"
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                label="หมวดหมู่ของสินค้า"
+              >
+                <MenuItem value="เยลลี่">เยลลี่</MenuItem>
+                <MenuItem value="ขนม">ขนม</MenuItem>
+                <MenuItem value="เครื่องดื่ม">เครื่องดื่ม</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* ราคาต้นทุน / ราคาขาย */}
+          <Grid item size={6}>
+            <TextField
+              fullWidth
+              name="costPrice"
+              label="ราคาต้นทุนสินค้า (บาท)"
+              value={form.costPrice}
+              onChange={handleChange}
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item size={6}>
+            <TextField
+              fullWidth
+              name="salePrice"
+              label="ราคาขายสินค้า (บาท)"
+              value={form.salePrice}
+              onChange={handleChange}
+              variant="outlined"
+            />
+          </Grid>
+
+          {/* Submit Button */}
+          <Grid item xs={12} sx={{ textAlign: 'center', mt: 1 }}>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: '#3a3d45',
+                px: 4,
+                py: 1,
+                fontWeight: 'bold',
+                borderRadius: 2,
+              }}
+              onClick={() => onSubmit(form)}
+            >
+              เพิ่มสินค้า
+            </Button>
+          </Grid>
+        </Grid>
+      </DialogContent>
+    </Dialog>
+  );
+}
