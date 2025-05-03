@@ -22,7 +22,7 @@ function AppSidebar({ isCollapsed }) {
             <MenuItem
                 icon={<ProductionQuantityLimitsOutlinedIcon />}
                 component={Link}
-                link="/tes"
+                link="/products"
                 badge={false}
                 isSelected={true}>
                 Product
