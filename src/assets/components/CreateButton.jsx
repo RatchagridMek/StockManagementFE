@@ -7,7 +7,7 @@ function CreateButton({ text, onClick }) {
       sx={{
         backgroundColor: '#373B44', // dark gray
         color: '#FFFFFF',           // white text
-        borderRadius: '20px',       // rounded corners
+        borderRadius: '10px',       // rounded corners
         padding: '5px 40px',
         fontSize: '1rem',
         fontWeight: 'bold',

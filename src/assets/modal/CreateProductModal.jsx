@@ -13,8 +13,9 @@ import {
   FormControl,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import CircularProgress from '@mui/material/CircularProgress';
 
-export default function CreateProductModal({ open, onClose, onSubmit }) {
+export default function CreateProductModal({ open, onClose, onSubmit, loading }) {
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -108,9 +109,10 @@ export default function CreateProductModal({ open, onClose, onSubmit }) {
           </Grid>
 
           {/* Submit Button */}
-          <Grid item xs={12} sx={{ textAlign: 'center', mt: 1 }}>
+          <Grid size={{ xs: 'grow', md: 6 }} offset={{ md: 3 }}>
             <Button
               variant="contained"
+              fullWidth
               sx={{
                 backgroundColor: '#3a3d45',
                 px: 4,
@@ -118,6 +120,8 @@ export default function CreateProductModal({ open, onClose, onSubmit }) {
                 fontWeight: 'bold',
                 borderRadius: 2,
               }}
+              loading={loading}
+              loadingPosition="end"
               onClick={() => onSubmit(form)}
             >
               เพิ่มสินค้า

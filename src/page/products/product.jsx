@@ -1,6 +1,6 @@
 
 
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Grid } from '@mui/material';
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -14,9 +14,11 @@ import ToggleButton from '@mui/material/ToggleButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BentoIcon from '@mui/icons-material/Bento';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import Modal from '@mui/joy/Modal';
 import CreateProductModal from '../../assets/modal/CreateProductModal';
-
+import Alert from '@mui/material/Alert';
+import AddStockModal from '../../assets/modal/AddStockModal';
+import Fade from '@mui/material/Fade';
+import Snackbar from '@mui/material/Snackbar';
 
 const initialList = [
     {
@@ -58,15 +60,13 @@ const initialList = [
         selected: false
     },
     {
-        label: '',
-        type: 'empty',
-        minWidth: 100,
+        type: 'AddStockbutton',
+        minWidth: 150,
         align: 'center',
         selected: false
     },
     {
-        type: 'button',
-        label: 'button',
+        type: 'CreateProductbutton',
         minWidth: 150,
         align: 'center',
         selected: false
@@ -186,6 +186,13 @@ function Product() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortedList, setSortedList] = useState(initialList);
     const [dataList, setDataList] = useState(rows)
+    const [toggleCreateProductModal, setToggleCreateProductModal] = useState(false)
+    const [toggleAddStockModal, setToggleAddStockModal] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [addStockSuccess, setAddStockSuccess] = useState(false);
+    const [addStockError, setAddStockError] = useState(false);
+    const [createProductSuccess, setCreateProductSuccess] = useState(false);
+    const [createProductError, setCreateProductError] = useState(false);
 
 
     const handleChangePage = (event, newPage) => {
@@ -199,6 +206,28 @@ function Product() {
 
     const onClick = () => {
         console.log('create product');
+    }
+
+    function onAddProduct(form) {
+        setLoading(true)
+        // send to backend for create product
+        // while create product calling backend API setLoading(true)
+        // after done 
+        setTimeout(() => {
+            setLoading(false)
+            setToggleCreateProductModal(false)
+            setCreateProductSuccess(true)
+        }, 2000)
+    }
+
+    function onAddStock(form) {
+        setLoading(true)
+        // send data to baclemd for add stock
+        setTimeout(() => {
+            setLoading(false)
+            setToggleAddStockModal(false)
+            setAddStockSuccess(true)
+        }, 2000)
     }
 
     function handleToggle(sortedItem) {
@@ -243,9 +272,52 @@ function Product() {
                         alignItems: 'center',
                     }}
                 >
-                    <Typography color="black" variant="h4" gutterBottom>
-                        Products
-                    </Typography>
+
+                    <Grid container spacing={2} sx={{ width: '100%' }}>
+                        <Grid item size={6}>
+                            <Typography color="black" variant="h4" gutterBottom>
+                                Products
+                            </Typography>
+                        </Grid>
+                        <Grid item size={6}>
+                            <Snackbar
+                                open={addStockSuccess}
+                                autoHideDuration={2000}
+                                onClose={() => setAddStockSuccess(false)}
+                                TransitionComponent={Fade}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <Alert variant="filled" onClose={() => setAddStockSuccess(false)} severity="success">เพิ่มสต๊อกสินค้าสำเร็จค่ะ</Alert>
+                            </Snackbar>
+                            <Snackbar
+                                open={addStockError}
+                                autoHideDuration={2000}
+                                onClose={() => setAddStockError(false)}
+                                TransitionComponent={Fade}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <Alert variant="filled" onClose={() => setAddStockError(false)} severity="error">เพิ่มสต๊อกสินค้าไม่สำเร็จค่ะ</Alert>
+                            </Snackbar>
+                            <Snackbar
+                                open={createProductSuccess}
+                                autoHideDuration={2000}
+                                onClose={() => setCreateProductSuccess(false)}
+                                TransitionComponent={Fade}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <Alert variant="filled" onClose={() => setCreateProductSuccess(false)} severity="success">เพิ่มสินค้าสำเร็จค่ะ</Alert>
+                            </Snackbar>
+                            <Snackbar
+                                open={createProductError}
+                                autoHideDuration={2000}
+                                onClose={() => setCreateProductError(false)}
+                                TransitionComponent={Fade}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <Alert variant="filled" onClose={() => setCreateProductError(false)} severity="error">เพิ่มสินค้าไม่สำเร็จค่ะ</Alert>
+                            </Snackbar>
+                        </Grid>
+                    </Grid>
                 </Box>
             </Box>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -254,13 +326,23 @@ function Product() {
                         <TableHead>
                             <TableRow>
                                 {sortedList.map((sortedItem) => {
-                                    if (sortedItem.type === 'button') {
+                                    if (sortedItem.type === 'CreateProductbutton') {
                                         return (
                                             <TableCell
                                                 align={sortedItem.align}
                                                 style={{ minWidth: sortedItem.minWidth }}
                                             >
-                                                <CreateButton text="เพิ่มสินค้า" onClick={onClick} />
+                                                <CreateButton text="เพิ่มสินค้า" onClick={() => setToggleCreateProductModal(true)} />
+                                            </TableCell>
+                                        )
+                                    }
+                                    else if (sortedItem.type === 'AddStockbutton') {
+                                        return (
+                                            <TableCell
+                                                align={sortedItem.align}
+                                                style={{ minWidth: sortedItem.minWidth }}
+                                            >
+                                                <CreateButton text="เพิ่มสต๊อกสินค้า" onClick={() => setToggleAddStockModal(true)} />
                                             </TableCell>
                                         )
                                     }
@@ -382,7 +464,8 @@ function Product() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <CreateProductModal open={true}/>
+            <CreateProductModal open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
+            <AddStockModal open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
         </div>
     )
 }
