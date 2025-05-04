@@ -19,6 +19,7 @@ import Alert from '@mui/material/Alert';
 import AddStockModal from '../../assets/modal/AddStockModal';
 import Fade from '@mui/material/Fade';
 import Snackbar from '@mui/material/Snackbar';
+import UpdateProductModal from '../../assets/modal/UpdateProductModal';
 
 const initialList = [
     {
@@ -193,6 +194,39 @@ function Product() {
     const [addStockError, setAddStockError] = useState(false);
     const [createProductSuccess, setCreateProductSuccess] = useState(false);
     const [createProductError, setCreateProductError] = useState(false);
+    const [toggleUpdateProductModal, setToggleUpdateProductModal] = useState(false)
+    const [updateForm, setUpdateForm] = useState({
+        name: '',
+        description: '',
+        category: '',
+        costPrice: '',
+        salePrice: '',
+    })
+
+    function handleUpdateProduct(form) {
+        // TODO: Update Product by productId
+        console.log(form)
+    }
+
+    function handleDeleteProduct(row) {
+        // TODO: Delete Product by productId
+        console.log("productId", row.id)
+    }
+
+    function buildUpdateData(row) {
+        let productId = row.id
+        // TODO: Get Product by productId
+        let productData = {
+            name: 'testProductName',
+            description: 'testProductDescription',
+            category: 'เยลลี่',
+            costPrice: 100,
+            salePrice: 200
+        }
+        setUpdateForm(productData)
+        console.log(updateForm)
+        setToggleUpdateProductModal(true)
+    }
 
 
     const handleChangePage = (event, newPage) => {
@@ -421,7 +455,7 @@ function Product() {
                                                     case 'editAction':
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
-                                                                <EditButton>แก้ไข</EditButton>
+                                                                <EditButton onClick={() => buildUpdateData(row)}>แก้ไข</EditButton>
                                                             </TableCell>
                                                         );
                                                     case 'deleteAction': {
@@ -435,7 +469,7 @@ function Product() {
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton>ลบ</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleDeleteProduct(row)}>ลบ</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
@@ -466,6 +500,7 @@ function Product() {
             </Paper>
             <CreateProductModal open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
             <AddStockModal open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
+            <UpdateProductModal onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
         </div>
     )
 }

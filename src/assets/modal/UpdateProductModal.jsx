@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +14,12 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function CreateProductModal({ open, onClose, onSubmit, loading }) {
+export default function UpdateProductModal({ open, onClose, onSubmit, loading, updateForm }) {
+
+    useEffect(() => {
+        setForm(updateForm);
+    }, [updateForm]);
+
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -31,7 +36,7 @@ export default function CreateProductModal({ open, onClose, onSubmit, loading })
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ textAlign: 'left', fontWeight: 'bold', fontSize: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        สร้างสินค้า
+        แก้ไขสินค้า
         <IconButton
           aria-label="close"
           onClick={onClose}
