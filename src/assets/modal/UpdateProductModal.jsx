@@ -129,7 +129,7 @@ export default function UpdateProductModal({ open, onClose, onSubmit, loading, u
               loadingPosition="end"
               onClick={() => onSubmit(form)}
             >
-              เพิ่มสินค้า
+              แก้ไขสินค้า
             </Button>
           </Grid>
         </Grid>

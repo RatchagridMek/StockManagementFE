@@ -112,13 +112,13 @@ const columns = [
         id: 'editAction',
         label: '',
         minWidth: 50,
-        align: 'center',
+        align: 'right',
     },
     {
         id: 'deleteAction',
         label: '',
         minWidth: 50,
-        align: 'center',
+        align: 'left',
     },
 ];
 

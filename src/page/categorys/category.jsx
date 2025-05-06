@@ -12,36 +12,26 @@ import CreateButton from '../../assets/components/CreateButton';
 import RecoverButton from '../../assets/components/RecoverButton';
 import ToggleButton from '@mui/material/ToggleButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import BentoIcon from '@mui/icons-material/Bento';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import CreateProductModal from '../../assets/modal/CreateProductModal';
 import Alert from '@mui/material/Alert';
-import AddStockModal from '../../assets/modal/AddStockModal';
 import Fade from '@mui/material/Fade';
 import Snackbar from '@mui/material/Snackbar';
-import UpdateProductModal from '../../assets/modal/UpdateProductModal';
+import UpdateCategoryModal from '../../assets/modal/UpdateCategoryModal'
+import CategoryIcon from '@mui/icons-material/Category';
+import CreateCategoryModal from '../../assets/modal/CreateCategoryModal';
 
 const initialList = [
     {
-        id: 'activedItem',
+        id: 'activatedCategory',
         type: 'sortedItem',
-        label: 'สินค้าที่เปิดใช้งาน',
-        minWidth: 125,
-        align: 'center',
-        selected: false
-    },
-    {
-        id: 'deletedItem',
-        type: 'sortedItem',
-        label: 'สินค้าที่ลบไปแล้ว',
+        label: 'หมวดหมู่ที่ยังเปิดใช้งาน',
         minWidth: 150,
         align: 'center',
         selected: false
     },
     {
-        id: 'lowStockItem',
+        id: 'deletedCategory',
         type: 'sortedItem',
-        label: 'สินค้าที่ใกล้หมดสต็อก',
+        label: 'หมวดหมู่ที่ลบไปแล้ว',
         minWidth: 150,
         align: 'center',
         selected: false
@@ -68,7 +58,7 @@ const initialList = [
         selected: false
     },
     {
-        type: 'CreateProductbutton',
+        type: 'CreateCategoryButton',
         minWidth: 150,
         align: 'center',
         selected: false
@@ -77,34 +67,27 @@ const initialList = [
 
 const columns = [
     {
-        id: 'productName',
-        label: 'ชื่อสินค้า',
+        id: 'categoryName',
+        label: 'ชื่อหมวดหมู่',
         minWidth: 300,
         align: 'center'
     },
     {
-        id: 'productStatus',
-        label: 'สถานะของสินค้า',
+        id: 'categoryStatus',
+        label: 'สถานะของหมวดหมู่',
         minWidth: 100,
         align: 'center',
     },
     {
-        id: 'productAmount',
-        label: 'ปริมาณสินค้าในคลัง',
+        id: 'productCountInCategory',
+        label: 'จำนวนสินค้าในหมวดหมู่',
         minWidth: 100,
         align: 'center',
         format: (value) => value.toFixed(2),
     },
     {
-        id: 'totalSales',
-        label: 'ยอดรวมราคาขาย',
-        minWidth: 150,
-        align: 'center',
-        format: (value) => value.toFixed(2),
-    },
-    {
-        id: 'totalCosts',
-        label: 'ยอดรวมราคาต้นทุน',
+        id: 'productCountInSale',
+        label: 'สินค้าที่กำลังขายอยู่',
         minWidth: 150,
         align: 'center',
         format: (value) => value.toFixed(2),
@@ -113,74 +96,45 @@ const columns = [
         id: 'editAction',
         label: '',
         minWidth: 50,
-        align: 'center',
+        align: 'right',
     },
     {
         id: 'deleteAction',
         label: '',
         minWidth: 50,
-        align: 'center',
+        align: 'left',
     },
 ];
 
 const rows = [
-    createData('1', 'ขนมเค้ก', 'Active', 1324171354, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 1403500365, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 60483973, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 327167434, 9833520, 9833520, 'AB15', 'AB15'),
-    createData('5', 'Canada', 'Active', 37602103, 9984670, 9984670, 'AB16', 'AB16'),
-    createData('6', 'Australia', 'Active', 25475400, 7692024, 7692024, 'AB17', 'AB17'),
-    createData('7', 'Germany', 'Active', 83019200, 357578, 357578, 'AB18', 'AB18'),
-    createData('8', 'Ireland', 'Active', 4857000, 70273, 70273, 'AB19', 'AB19'),
-    createData('9', 'Mexico', 'Active', 126577691, 1972550, 1972550, 'AB20', 'AB20'),
-    createData('10', 'Japan', 'Active', 126317000, 377973, 377973, 'AB21', 'AB21'),
-    createData('11', 'France', 'Active', 67022000, 640679, 640679, 'AB22', 'AB22'),
-    createData('12', 'United Kingdom', 'Active', 67545757, 242495, 242495, 'AB23', 'AB23'),
-    createData('13', 'Russia', 'Deleted', 146793744, 17098246, 17098246, 'AB24', 'AB24'),
-    createData('14', 'Nigeria', 'Deleted', 200962417, 923768, 923768, 'AB25', 'AB25'),
-    createData('15', 'Brazil', 'Deleted', 210147125, 8515767, 8515767, 'AB26', 'AB26'),
+    createData('1', 'เยลลี่', 'Active', 5, 4, 'AB12', 'AB12'),
+    createData('2', 'บราวนี่', 'Active', 4, 4, 'AB13', 'AB13'),
+    createData('3', 'คุกกี้', 'Active', 3, 3, 'AB14', 'AB14'),
+    createData('4', 'ขนมปัง', 'Active', 2, 0, 'AB15', 'AB15'),
+    createData('5', 'โทสต์', 'Deleted', 5, 4, 'AB12', 'AB12'),
+    createData('6', 'อาหารเช้า', 'Deleted', 4, 4, 'AB13', 'AB13'),
+    createData('7', 'อาหารกลางวัน', 'Deleted', 3, 3, 'AB14', 'AB14'),
+    createData('8', 'อาหารเย็น', 'Deleted', 2, 0, 'AB15', 'AB15'),
 ];
 
 const deletedData = [
-    createData('13', 'Russia', 'Deleted', 146793744, 17098246, 17098246, 'AB24', 'AB24'),
-    createData('14', 'Nigeria', 'Deleted', 200962417, 923768, 923768, 'AB25', 'AB25'),
-    createData('15', 'Brazil', 'Deleted', 210147125, 8515767, 8515767, 'AB26', 'AB26'),
-]
-
-const lowStockData = [
-    createData('1', 'ขนมเค้ก', 'Active', 3, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 3, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 4, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 1, 9833520, 9833520, 'AB15', 'AB15'),
+    createData('5', 'โทสต์', 'Deleted', 5, 4, 'AB12', 'AB12'),
+    createData('6', 'อาหารเช้า', 'Deleted', 4, 4, 'AB13', 'AB13'),
+    createData('7', 'อาหารกลางวัน', 'Deleted', 3, 3, 'AB14', 'AB14'),
+    createData('8', 'อาหารเย็น', 'Deleted', 2, 0, 'AB15', 'AB15'),
 ]
 
 const activedData = [
-    createData('1', 'ขนมเค้ก', 'Active', 100, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 100, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 100, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 100, 9833520, 9833520, 'AB15', 'AB15'),
-    createData('5', 'Canada', 'Active', 100, 9984670, 9984670, 'AB16', 'AB16'),
-    createData('6', 'Australia', 'Active', 100, 7692024, 7692024, 'AB17', 'AB17'),
-    createData('7', 'Germany', 'Active', 100, 357578, 357578, 'AB18', 'AB18'),
-    createData('8', 'Ireland', 'Active', 100, 70273, 70273, 'AB19', 'AB19'),
-    createData('9', 'Mexico', 'Active', 100, 1972550, 1972550, 'AB20', 'AB20'),
-    createData('10', 'Japan', 'Active', 100, 377973, 377973, 'AB21', 'AB21'),
-    createData('11', 'France', 'Active', 100, 640679, 640679, 'AB22', 'AB22'),
-    createData('12', 'United Kingdom', 'Active', 100, 242495, 242495, 'AB23', 'AB23'),
+    createData('1', 'เยลลี่', 'Active', 5, 4, 'AB12', 'AB12'),
+    createData('2', 'บราวนี่', 'Active', 4, 4, 'AB13', 'AB13'),
+    createData('3', 'คุกกี้', 'Active', 3, 3, 'AB14', 'AB14'),
+    createData('4', 'ขนมปัง', 'Active', 2, 0, 'AB15', 'AB15'),
 ]
 
-function createData(id, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction) {
-    productAmount = productAmount.toLocaleString('en-US') + ' ชิ้น'
-    totalSales = formatNumberWithCommasAndDecimals(totalSales) + ' บาท'
-    totalCosts = formatNumberWithCommasAndDecimals(totalCosts) + ' บาท'
-    return { id, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction };
-}
-
-function formatNumberWithCommasAndDecimals(value) {
-    return value.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+function createData(id, categoryName, categoryStatus, productCountInCategory, productCountInSale, editAction, deleteAction) {
+    productCountInCategory = productCountInCategory.toLocaleString('en-US') + ' ชิ้น'
+    productCountInSale = productCountInSale.toLocaleString('en-US') + ' ชิ้น'
+    return { id, categoryName, categoryStatus, productCountInCategory, productCountInSale, editAction, deleteAction };
 }
 
 function Category() {
@@ -188,23 +142,16 @@ function Category() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortedList, setSortedList] = useState(initialList);
     const [dataList, setDataList] = useState(rows)
-    const [toggleCreateProductModal, setToggleCreateProductModal] = useState(false)
-    const [toggleAddStockModal, setToggleAddStockModal] = useState(false)
+    const [toggleCreateCategoryModal, setToggleCreateCategoryModal] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [addStockSuccess, setAddStockSuccess] = useState(false);
-    const [addStockError, setAddStockError] = useState(false);
     const [createProductSuccess, setCreateProductSuccess] = useState(false);
     const [createProductError, setCreateProductError] = useState(false);
-    const [toggleUpdateProductModal, setToggleUpdateProductModal] = useState(false)
+    const [toggleUpdateCategoryModal, setToggleUpdateCategoryModal] = useState(false)
     const [updateForm, setUpdateForm] = useState({
         name: '',
-        description: '',
-        category: '',
-        costPrice: '',
-        salePrice: '',
     })
 
-    function handleUpdateProduct(form) {
+    function handleUpdateCategory(form) {
         // TODO: Update Product by productId
         console.log(form)
     }
@@ -215,18 +162,15 @@ function Category() {
     }
 
     function buildUpdateData(row) {
-        let productId = row.id
+        let categoryId = row.id
+        let categoryName = row.categoryName
         // TODO: Get Product by productId
         let productData = {
-            name: 'testProductName',
-            description: 'testProductDescription',
-            category: 'เยลลี่',
-            costPrice: 100,
-            salePrice: 200
+            name: categoryName,
         }
         setUpdateForm(productData)
         console.log(updateForm)
-        setToggleUpdateProductModal(true)
+        setToggleUpdateCategoryModal(true)
     }
 
 
@@ -243,25 +187,16 @@ function Category() {
         console.log('create product');
     }
 
-    function onAddProduct(form) {
+    function onAddCategory(form) {
         setLoading(true)
+        console.log(form)
         // send to backend for create product
         // while create product calling backend API setLoading(true)
         // after done 
         setTimeout(() => {
             setLoading(false)
-            setToggleCreateProductModal(false)
+            setToggleCreateCategoryModal(false)
             setCreateProductSuccess(true)
-        }, 2000)
-    }
-
-    function onAddStock(form) {
-        setLoading(true)
-        // send data to baclemd for add stock
-        setTimeout(() => {
-            setLoading(false)
-            setToggleAddStockModal(false)
-            setAddStockSuccess(true)
         }, 2000)
     }
 
@@ -284,11 +219,9 @@ function Category() {
         }
         if (!isClear) {
             switch (sortedItem.id) {
-                case 'deletedItem': setDataList(deletedData)
+                case 'activatedCategory': setDataList(activedData)
                     break;
-                case 'lowStockItem': setDataList(lowStockData)
-                    break;
-                case 'activedItem': setDataList(activedData)
+                case 'deletedCategory': setDataList(deletedData)
                     break;
             }
         } else {
@@ -311,28 +244,10 @@ function Category() {
                     <Grid container spacing={2} sx={{ width: '100%' }}>
                         <Grid item size={6}>
                             <Typography color="black" variant="h4" gutterBottom>
-                                Products
+                                Categories
                             </Typography>
                         </Grid>
                         <Grid item size={6}>
-                            <Snackbar
-                                open={addStockSuccess}
-                                autoHideDuration={2000}
-                                onClose={() => setAddStockSuccess(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setAddStockSuccess(false)} severity="success">เพิ่มสต๊อกสินค้าสำเร็จค่ะ</Alert>
-                            </Snackbar>
-                            <Snackbar
-                                open={addStockError}
-                                autoHideDuration={2000}
-                                onClose={() => setAddStockError(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setAddStockError(false)} severity="error">เพิ่มสต๊อกสินค้าไม่สำเร็จค่ะ</Alert>
-                            </Snackbar>
                             <Snackbar
                                 open={createProductSuccess}
                                 autoHideDuration={2000}
@@ -340,7 +255,7 @@ function Category() {
                                 TransitionComponent={Fade}
                                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                             >
-                                <Alert variant="filled" onClose={() => setCreateProductSuccess(false)} severity="success">เพิ่มสินค้าสำเร็จค่ะ</Alert>
+                                <Alert variant="filled" onClose={() => setCreateProductSuccess(false)} severity="success">เพิ่มหมวดหมู่สินค้าสำเร็จค่ะ</Alert>
                             </Snackbar>
                             <Snackbar
                                 open={createProductError}
@@ -349,7 +264,7 @@ function Category() {
                                 TransitionComponent={Fade}
                                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                             >
-                                <Alert variant="filled" onClose={() => setCreateProductError(false)} severity="error">เพิ่มสินค้าไม่สำเร็จค่ะ</Alert>
+                                <Alert variant="filled" onClose={() => setCreateProductError(false)} severity="error">เพิ่มหมวดหมู่สินค้าไม่สำเร็จค่ะ</Alert>
                             </Snackbar>
                         </Grid>
                     </Grid>
@@ -361,23 +276,13 @@ function Category() {
                         <TableHead>
                             <TableRow>
                                 {sortedList.map((sortedItem) => {
-                                    if (sortedItem.type === 'CreateProductbutton') {
+                                    if (sortedItem.type === 'CreateCategoryButton') {
                                         return (
                                             <TableCell
                                                 align={sortedItem.align}
                                                 style={{ minWidth: sortedItem.minWidth }}
                                             >
-                                                <CreateButton text="เพิ่มสินค้า" onClick={() => setToggleCreateProductModal(true)} />
-                                            </TableCell>
-                                        )
-                                    }
-                                    else if (sortedItem.type === 'AddStockbutton') {
-                                        return (
-                                            <TableCell
-                                                align={sortedItem.align}
-                                                style={{ minWidth: sortedItem.minWidth }}
-                                            >
-                                                <CreateButton text="เพิ่มสต๊อกสินค้า" onClick={() => setToggleAddStockModal(true)} />
+                                                <CreateButton text="เพิ่มหมวดหมู่" onClick={() => setToggleCreateCategoryModal(true)} />
                                             </TableCell>
                                         )
                                     }
@@ -392,9 +297,8 @@ function Category() {
                                                     selected={sortedItem.selected}
                                                     onChange={() => handleToggle(sortedItem)}
                                                 >
-                                                    {sortedItem.id === 'deletedItem' && <DeleteIcon />}
-                                                    {sortedItem.id === 'lowStockItem' && <BentoIcon />}
-                                                    {sortedItem.id === 'activedItem' && <StorefrontIcon />}
+                                                    {sortedItem.id === 'activatedCategory' && <CategoryIcon />}
+                                                    {sortedItem.id === 'deletedCategory' && <DeleteIcon />}
                                                     {sortedItem.label}
                                                 </ToggleButton>
                                             </TableCell>
@@ -499,9 +403,8 @@ function Category() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <CreateProductModal open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
-            <AddStockModal open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
-            <UpdateProductModal onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
+            <CreateCategoryModal open={toggleCreateCategoryModal} onClose={(current) => setToggleCreateCategoryModal(!current)} onSubmit={onAddCategory} loading={loading} />
+            <UpdateCategoryModal onSubmit={handleUpdateCategory} open={toggleUpdateCategoryModal} onClose={(current) => setToggleUpdateCategoryModal(!current)} updateForm={updateForm} />
         </div>
     )
 }
