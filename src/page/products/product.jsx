@@ -16,10 +16,10 @@ import BentoIcon from '@mui/icons-material/Bento';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import CreateProductModal from '../../assets/modal/CreateProductModal';
 import Alert from '@mui/material/Alert';
-import AddStockModal from '../../assets/modal/AddStockModal';
 import Fade from '@mui/material/Fade';
 import Snackbar from '@mui/material/Snackbar';
 import UpdateProductModal from '../../assets/modal/UpdateProductModal';
+import AddStockModalMain from '../../assets/modal/AddStockModalMain';
 
 const initialList = [
     {
@@ -499,7 +499,7 @@ function Product() {
                 />
             </Paper>
             <CreateProductModal open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
-            <AddStockModal open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
+            <AddStockModalMain open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
             <UpdateProductModal onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
         </div>
     )
