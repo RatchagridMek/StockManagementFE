@@ -2,6 +2,10 @@
 
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Grid } from '@mui/material';
 import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EditButton from '../../assets/components/EditButton';
@@ -20,6 +24,7 @@ import Fade from '@mui/material/Fade';
 import Snackbar from '@mui/material/Snackbar';
 import UpdateProductModal from '../../assets/modal/UpdateProductModal';
 import AddStockModalMain from '../../assets/modal/AddStockModalMain';
+import { useEffect } from 'react';
 
 const initialList = [
     {
@@ -122,57 +127,11 @@ const columns = [
     },
 ];
 
-const rows = [
-    createData('1', 'ขนมเค้ก', 'Active', 1324171354, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 1403500365, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 60483973, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 327167434, 9833520, 9833520, 'AB15', 'AB15'),
-    createData('5', 'Canada', 'Active', 37602103, 9984670, 9984670, 'AB16', 'AB16'),
-    createData('6', 'Australia', 'Active', 25475400, 7692024, 7692024, 'AB17', 'AB17'),
-    createData('7', 'Germany', 'Active', 83019200, 357578, 357578, 'AB18', 'AB18'),
-    createData('8', 'Ireland', 'Active', 4857000, 70273, 70273, 'AB19', 'AB19'),
-    createData('9', 'Mexico', 'Active', 126577691, 1972550, 1972550, 'AB20', 'AB20'),
-    createData('10', 'Japan', 'Active', 126317000, 377973, 377973, 'AB21', 'AB21'),
-    createData('11', 'France', 'Active', 67022000, 640679, 640679, 'AB22', 'AB22'),
-    createData('12', 'United Kingdom', 'Active', 67545757, 242495, 242495, 'AB23', 'AB23'),
-    createData('13', 'Russia', 'Deleted', 146793744, 17098246, 17098246, 'AB24', 'AB24'),
-    createData('14', 'Nigeria', 'Deleted', 200962417, 923768, 923768, 'AB25', 'AB25'),
-    createData('15', 'Brazil', 'Deleted', 210147125, 8515767, 8515767, 'AB26', 'AB26'),
-];
-
-const deletedData = [
-    createData('13', 'Russia', 'Deleted', 146793744, 17098246, 17098246, 'AB24', 'AB24'),
-    createData('14', 'Nigeria', 'Deleted', 200962417, 923768, 923768, 'AB25', 'AB25'),
-    createData('15', 'Brazil', 'Deleted', 210147125, 8515767, 8515767, 'AB26', 'AB26'),
-]
-
-const lowStockData = [
-    createData('1', 'ขนมเค้ก', 'Active', 3, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 3, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 4, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 1, 9833520, 9833520, 'AB15', 'AB15'),
-]
-
-const activedData = [
-    createData('1', 'ขนมเค้ก', 'Active', 100, 3287263, 3287263, 'AB12', 'AB12'),
-    createData('2', 'China', 'Active', 100, 9596961, 9596961, 'AB13', 'AB13'),
-    createData('3', 'Italy', 'Active', 100, 301340, 301340, 'AB14', 'AB14'),
-    createData('4', 'United States', 'Active', 100, 9833520, 9833520, 'AB15', 'AB15'),
-    createData('5', 'Canada', 'Active', 100, 9984670, 9984670, 'AB16', 'AB16'),
-    createData('6', 'Australia', 'Active', 100, 7692024, 7692024, 'AB17', 'AB17'),
-    createData('7', 'Germany', 'Active', 100, 357578, 357578, 'AB18', 'AB18'),
-    createData('8', 'Ireland', 'Active', 100, 70273, 70273, 'AB19', 'AB19'),
-    createData('9', 'Mexico', 'Active', 100, 1972550, 1972550, 'AB20', 'AB20'),
-    createData('10', 'Japan', 'Active', 100, 377973, 377973, 'AB21', 'AB21'),
-    createData('11', 'France', 'Active', 100, 640679, 640679, 'AB22', 'AB22'),
-    createData('12', 'United Kingdom', 'Active', 100, 242495, 242495, 'AB23', 'AB23'),
-]
-
-function createData(id, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction) {
+function createData(id, categoryId, productDescription, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction, productPrice, productStockPrice) {
     productAmount = productAmount.toLocaleString('en-US') + ' ชิ้น'
     totalSales = formatNumberWithCommasAndDecimals(totalSales) + ' บาท'
     totalCosts = formatNumberWithCommasAndDecimals(totalCosts) + ' บาท'
-    return { id, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction };
+    return { id, categoryId, productDescription, productName, productStatus, productAmount, totalSales, totalCosts, editAction, deleteAction, productPrice, productStockPrice };
 }
 
 function formatNumberWithCommasAndDecimals(value) {
@@ -183,18 +142,126 @@ function formatNumberWithCommasAndDecimals(value) {
 }
 
 function Product() {
+
+    useEffect(() => {
+        async function fetchProductData() {
+            fetch("http://localhost:8000/api/v1/product/getAll")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then((data) => {
+                    let row = []
+                    let deletedRow = []
+                    let activedRow = []
+                    let lowStockRow = []
+                    data.data.map((item) => {
+                        let productId = item.id
+                        let productCategory = item.categoryId
+                        let productDescription = item.description
+                        let productName = item.name
+                        let productStatus = item.isDeleted ? 'Deleted' : 'Active'
+                        let productAmount = Number(item.amount)
+                        let productPrice = Number(item.price)
+                        let productStockPrice = Number(item.stockPrice)
+                        let totalSales = Number(item.amount) * Number(item.price)
+                        let totalCosts = Number(item.amount) * Number(item.stockPrice)
+                        let editAction = "AB" + item.id
+                        let deleteAction = "BA" + item.id
+                        if (item.isDeleted) {
+                            deletedRow.push(
+                                createData(
+                                    productId, productCategory,
+                                    productDescription, productName,
+                                    productStatus, productAmount,
+                                    totalSales, totalCosts,
+                                    editAction, deleteAction,
+                                    productPrice, productStockPrice
+                                )
+                            )
+                        }
+                        if (!item.isDeleted) {
+                            activedRow.push(
+                                createData(
+                                    productId, productCategory,
+                                    productDescription, productName,
+                                    productStatus, productAmount,
+                                    totalSales, totalCosts,
+                                    editAction, deleteAction,
+                                    productPrice, productStockPrice
+                                )
+                            )
+                        }
+                        if (Number(item.amount) < 5) {
+                            lowStockRow.push(
+                                createData(
+                                    productId, productCategory,
+                                    productDescription, productName,
+                                    productStatus, productAmount,
+                                    totalSales, totalCosts,
+                                    editAction, deleteAction,
+                                    productPrice, productStockPrice
+                                )
+                            )
+                        }
+                        row.push(
+                            createData(
+                                productId, productCategory,
+                                productDescription, productName,
+                                productStatus, productAmount,
+                                totalSales, totalCosts,
+                                editAction, deleteAction,
+                                productPrice, productStockPrice
+                            )
+                        )
+                    })
+                    setDataList(row)
+                    setAllDataList(row)
+                    setDeletedDataList(deletedRow)
+                    setLowStockDataList(lowStockRow)
+                    setActivedDataList(activedRow)
+                })
+                .catch((error) => console.error("Fetch error:", error));
+        }
+
+        async function fetchCategoryData() {
+            fetch("http://localhost:8000/api/v1/category/getAll")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then((data) => {
+                    setCategoryList(data.data)
+                })
+                .catch((error) => console.error("Fetch error:", error));
+        }
+
+        fetchProductData()
+        fetchCategoryData()
+
+    }, []);
+
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortedList, setSortedList] = useState(initialList);
-    const [dataList, setDataList] = useState(rows)
+    const [dataList, setDataList] = useState([])
+    const [allDataList, setAllDataList] = useState([])
+    const [deletedDataList, setDeletedDataList] = useState([])
+    const [lowStockDataList, setLowStockDataList] = useState([])
+    const [activedDataList, setActivedDataList] = useState([])
+    const [categoryList, setCategoryList] = useState([])
     const [toggleCreateProductModal, setToggleCreateProductModal] = useState(false)
     const [toggleAddStockModal, setToggleAddStockModal] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [addStockSuccess, setAddStockSuccess] = useState(false);
-    const [addStockError, setAddStockError] = useState(false);
-    const [createProductSuccess, setCreateProductSuccess] = useState(false);
-    const [createProductError, setCreateProductError] = useState(false);
+    const [notificationPopup, setNotificationPopup] = useState(false)
+    const [notificationType, setNotificationType] = useState("")
+    const [notificationMessage, setNotificationMessage] = useState("")
     const [toggleUpdateProductModal, setToggleUpdateProductModal] = useState(false)
+    const [updateLoading, setUpdateLoading] = useState(false)
+    const [confirmType, setConfirmType] = useState("")
+    const [confirmModalToggle, setConfirmModalToggle] = useState(false)
+    const [confirmActionId, setConfirmActionId] = useState("")
+    const [buttonActionLoading, setButtonActionLoading] = useState(false)
     const [updateForm, setUpdateForm] = useState({
         name: '',
         description: '',
@@ -205,26 +272,132 @@ function Product() {
 
     function handleUpdateProduct(form) {
         // TODO: Update Product by productId
-        console.log(form)
+        setUpdateLoading(true)
+        let productId = form.id
+        let productName = form.name
+        let productDescription = form.description
+        let categoryId = categoryList.find((item) => item.name === form.category).id
+        let productCostPrice = Number(form.costPrice)
+        let productSalePrice = Number(form.salePrice)
+        let updateProductForm = {
+            productId: productId,
+            name: productName,
+            description: productDescription,
+            category_id: categoryId,
+            stock_price: productCostPrice,
+            price: productSalePrice
+        }
+        fetch("http://localhost:8000/api/v1/product/update", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateProductForm),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                setToggleUpdateProductModal(false)
+                setUpdateLoading(false)
+                fetchProduct()
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("อัปเดตข้อมูลสินค้าสำเร็จค่ะ")
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("อัปเดตข้อมูลสินค้าไม่สำเร็จค่ะ")
+                setUpdateLoading(false)
+            });
     }
 
-    function handleDeleteProduct(row) {
+    function handleConfirmActionProduct(row, type) {
+        setConfirmType(type)
+        setConfirmModalToggle(true)
+        setConfirmActionId(row.id)
+    }
+
+    function handleDeleteProduct() {
         // TODO: Delete Product by productId
-        console.log("productId", row.id)
+        setButtonActionLoading(true)
+        fetch("http://localhost:8000/api/v1/product/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productId: confirmActionId }),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                fetchProduct()
+                setConfirmModalToggle(false)
+                setButtonActionLoading(false)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("ลบสินค้าสำเร็จค่ะ")
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("ลบสินค้าไม่สำเร็จค่ะ")
+            });
+    }
+
+    function handleRecoverProduct() {
+        // TODO: Recover Product by productId
+        setButtonActionLoading(true)
+        fetch("http://localhost:8000/api/v1/product/restore", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productId: confirmActionId }),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                fetchProduct()
+                setConfirmModalToggle(false)
+                setButtonActionLoading(false)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("กู้คืนสินค้าสำเร็จค่ะ")
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("กู้คืนสินค้าไม่สำเร็จค่ะ")
+            });
     }
 
     function buildUpdateData(row) {
         let productId = row.id
+        let productName = row.productName
+        let productDescription = row.productDescription
+        let productCostPrice = row.productStockPrice
+        let productSalePrice = row.productPrice
+
         // TODO: Get Product by productId
         let productData = {
-            name: 'testProductName',
-            description: 'testProductDescription',
-            category: 'เยลลี่',
-            costPrice: 100,
-            salePrice: 200
+            id: productId,
+            name: productName,
+            description: productDescription,
+            category: categoryList.find((item) => item.id === row.categoryId).name,
+            costPrice: productCostPrice,
+            salePrice: productSalePrice
         }
         setUpdateForm(productData)
-        console.log(updateForm)
         setToggleUpdateProductModal(true)
     }
 
@@ -238,30 +411,165 @@ function Product() {
         setPage(0);
     };
 
-    const onClick = () => {
-        console.log('create product');
-    }
-
     function onAddProduct(form) {
         setLoading(true)
-        // send to backend for create product
-        // while create product calling backend API setLoading(true)
-        // after done 
-        setTimeout(() => {
-            setLoading(false)
-            setToggleCreateProductModal(false)
-            setCreateProductSuccess(true)
-        }, 2000)
+        let createProductPayload = {
+            name: form.name,
+            description: form.description,
+            categoryId: form.category,
+            stockPrice: form.costPrice,
+            sellPrice: form.salePrice
+        }
+        fetch("http://localhost:8000/api/v1/product/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(createProductPayload),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                setLoading(false)
+                setToggleCreateProductModal(false)
+                // setCreateProductSuccess(true)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("เพิ่มสินค้าสำเร็จค่ะ")
+                fetchProduct()
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setLoading(false)
+                // setCreateProductError(true)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("เพิ่มสินค้าไม่สำเร็จค่ะ")
+            });
     }
 
     function onAddStock(form) {
         setLoading(true)
         // send data to baclemd for add stock
-        setTimeout(() => {
-            setLoading(false)
-            setToggleAddStockModal(false)
-            setAddStockSuccess(true)
-        }, 2000)
+        let addStockPayload = {
+            productList: []
+        }
+        form.map((item) => {
+            addStockPayload.productList.push({
+                productId: item.id,
+                productAmount: item.quantity
+            })
+        })
+        fetch("http://localhost:8000/api/v1/product/addStock", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(addStockPayload),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                setLoading(false)
+                setToggleAddStockModal(false)
+                // setAddStockSuccess(true)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("เพิ่มสต๊อกสินค้าสำเร็จค่ะ")
+                fetchProduct()
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setLoading(false)
+                // setAddStockError(true)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("เพิ่มสต๊อกสินค้าไม่สำเร็จค่ะ")
+            });
+    }
+
+    async function fetchProduct() {
+        fetch("http://localhost:8000/api/v1/product/getAll")
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                let row = []
+                let deletedRow = []
+                let activedRow = []
+                let lowStockRow = []
+                data.data.map((item) => {
+                    let productId = item.id
+                    let productCategory = item.categoryId
+                    let productDescription = item.description
+                    let productName = item.name
+                    let productStatus = item.isDeleted ? 'Deleted' : 'Active'
+                    let productAmount = Number(item.amount)
+                    let productPrice = Number(item.price)
+                    let productStockPrice = Number(item.stockPrice)
+                    let totalSales = Number(item.amount) * Number(item.price)
+                    let totalCosts = Number(item.amount) * Number(item.stockPrice)
+                    let editAction = "AB" + item.id
+                    let deleteAction = "BA" + item.id
+                    if (item.isDeleted) {
+                        deletedRow.push(
+                            createData(
+                                productId, productCategory,
+                                productDescription, productName,
+                                productStatus, productAmount,
+                                totalSales, totalCosts,
+                                editAction, deleteAction,
+                                productPrice, productStockPrice
+                            )
+                        )
+                    }
+                    if (!item.isDeleted) {
+                        activedRow.push(
+                            createData(
+                                productId, productCategory,
+                                productDescription, productName,
+                                productStatus, productAmount,
+                                totalSales, totalCosts,
+                                editAction, deleteAction,
+                                productPrice, productStockPrice
+                            )
+                        )
+                    }
+                    if (Number(item.amount) < 5) {
+                        lowStockRow.push(
+                            createData(
+                                productId, productCategory,
+                                productDescription, productName,
+                                productStatus, productAmount,
+                                totalSales, totalCosts,
+                                editAction, deleteAction,
+                                productPrice, productStockPrice
+                            )
+                        )
+                    }
+                    row.push(
+                        createData(
+                            productId, productCategory,
+                            productDescription, productName,
+                            productStatus, productAmount,
+                            totalSales, totalCosts,
+                            editAction, deleteAction,
+                            productPrice, productStockPrice
+                        )
+                    )
+                })
+                setDataList(row)
+                setAllDataList(row)
+                setDeletedDataList(deletedRow)
+                setLowStockDataList(lowStockRow)
+                setActivedDataList(activedRow)
+            })
+            .catch((error) => console.error("Fetch error:", error));
     }
 
     function handleToggle(sortedItem) {
@@ -283,15 +591,15 @@ function Product() {
         }
         if (!isClear) {
             switch (sortedItem.id) {
-                case 'deletedItem': setDataList(deletedData)
+                case 'deletedItem': setDataList(deletedDataList)
                     break;
-                case 'lowStockItem': setDataList(lowStockData)
+                case 'lowStockItem': setDataList(lowStockDataList)
                     break;
-                case 'activedItem': setDataList(activedData)
+                case 'activedItem': setDataList(activedDataList)
                     break;
             }
         } else {
-            setDataList(rows)
+            setDataList(allDataList)
         }
     }
 
@@ -315,40 +623,13 @@ function Product() {
                         </Grid>
                         <Grid item size={6}>
                             <Snackbar
-                                open={addStockSuccess}
+                                open={notificationPopup}
                                 autoHideDuration={2000}
-                                onClose={() => setAddStockSuccess(false)}
+                                onClose={() => setNotificationPopup(false)}
                                 TransitionComponent={Fade}
                                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                             >
-                                <Alert variant="filled" onClose={() => setAddStockSuccess(false)} severity="success">เพิ่มสต๊อกสินค้าสำเร็จค่ะ</Alert>
-                            </Snackbar>
-                            <Snackbar
-                                open={addStockError}
-                                autoHideDuration={2000}
-                                onClose={() => setAddStockError(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setAddStockError(false)} severity="error">เพิ่มสต๊อกสินค้าไม่สำเร็จค่ะ</Alert>
-                            </Snackbar>
-                            <Snackbar
-                                open={createProductSuccess}
-                                autoHideDuration={2000}
-                                onClose={() => setCreateProductSuccess(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setCreateProductSuccess(false)} severity="success">เพิ่มสินค้าสำเร็จค่ะ</Alert>
-                            </Snackbar>
-                            <Snackbar
-                                open={createProductError}
-                                autoHideDuration={2000}
-                                onClose={() => setCreateProductError(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setCreateProductError(false)} severity="error">เพิ่มสินค้าไม่สำเร็จค่ะ</Alert>
+                                <Alert variant="filled" onClose={() => setNotificationPopup(false)} severity={notificationType}>{notificationMessage}</Alert>
                             </Snackbar>
                         </Grid>
                     </Grid>
@@ -463,13 +744,13 @@ function Product() {
                                                             case 'Deleted':
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <RecoverButton>กู้คืน</RecoverButton>
+                                                                        <RecoverButton onClick={() => handleConfirmActionProduct(row, 'recover')}>กู้คืน</RecoverButton>
                                                                     </TableCell>
                                                                 );
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton onClick={() => handleDeleteProduct(row)}>ลบ</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleConfirmActionProduct(row, 'delete')}>ลบ</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
@@ -498,9 +779,37 @@ function Product() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <CreateProductModal open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
-            <AddStockModalMain open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} />
-            <UpdateProductModal onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
+            <Dialog open={confirmModalToggle} onClose={(current) => setConfirmModalToggle(!current)}>
+                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะลบสินค้าใช่หรือไม่ ?" : "คุณต้องการที่จะกู้คืนสินค้าใช่หรือไม่ ?"}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => setConfirmModalToggle(!confirmModalToggle)} color="error" variant="contained">
+                        ยกเลิก
+                    </Button>
+                    <Button onClick={() => {
+                        switch (confirmType) {
+                            case 'delete': {
+                                handleDeleteProduct();
+                                break;
+                            }
+                            case 'recover': {
+                                handleRecoverProduct();
+                                break;
+                            }
+                        }
+                    }} 
+                    color="success" 
+                    variant="contained"
+                    loading={buttonActionLoading}
+                    loadingPosition="end"
+                    >
+                        ยืนยัน
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <CreateProductModal categoryList={categoryList} open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
+            <AddStockModalMain open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} categoryList={categoryList} productList={activedDataList}/>
+            <UpdateProductModal categoryList={categoryList} updateLoading={updateLoading} onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
+            
         </div>
     )
 }

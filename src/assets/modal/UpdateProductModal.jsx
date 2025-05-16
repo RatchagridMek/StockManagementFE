@@ -14,13 +14,14 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function UpdateProductModal({ open, onClose, onSubmit, loading, updateForm }) {
+export default function UpdateProductModal({ open, onClose, onSubmit, updateLoading, updateForm, categoryList }) {
 
-    useEffect(() => {
-        setForm(updateForm);
-    }, [updateForm]);
+  useEffect(() => {
+    setForm(updateForm);
+  }, [updateForm]);
 
   const [form, setForm] = useState({
+    id: '',
     name: '',
     description: '',
     category: '',
@@ -47,7 +48,7 @@ export default function UpdateProductModal({ open, onClose, onSubmit, loading, u
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
-            {/* # free spacing block */}
+          {/* # free spacing block */}
           <div sx={{ display: 'block' }}></div>
           {/* ชื่อสินค้า / รายละเอียด */}
           <Grid item size={12}>
@@ -83,9 +84,11 @@ export default function UpdateProductModal({ open, onClose, onSubmit, loading, u
                 onChange={handleChange}
                 label="หมวดหมู่ของสินค้า"
               >
-                <MenuItem value="เยลลี่">เยลลี่</MenuItem>
-                <MenuItem value="ขนม">ขนม</MenuItem>
-                <MenuItem value="เครื่องดื่ม">เครื่องดื่ม</MenuItem>
+                {categoryList.map((item) => (
+                  <MenuItem key={item.id} value={item.name}>
+                    {item.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -125,9 +128,11 @@ export default function UpdateProductModal({ open, onClose, onSubmit, loading, u
                 fontWeight: 'bold',
                 borderRadius: 2,
               }}
-              loading={loading}
+              loading={updateLoading}
               loadingPosition="end"
-              onClick={() => onSubmit(form)}
+              onClick={() => {
+                onSubmit(form)
+              }}
             >
               แก้ไขสินค้า
             </Button>

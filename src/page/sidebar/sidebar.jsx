@@ -33,9 +33,9 @@ function AppSidebar({ isCollapsed }) {
             <MenuItem
                 icon={<Inventory2OutlinedIcon />}
                 component={Link}
-                link="/test"
+                link="/orders"
                 badge={false}
-                isSelected={currentPath === "/test"}>
+                isSelected={currentPath === "/orders"}>
                 Order
             </MenuItem>
             <MenuItem
