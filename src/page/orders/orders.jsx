@@ -1,7 +1,7 @@
 
 
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Grid } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import EditButton from '../../assets/components/EditButton';
@@ -12,6 +12,8 @@ import Fade from '@mui/material/Fade';
 import Snackbar from '@mui/material/Snackbar';
 import CategoryIcon from '@mui/icons-material/Category';
 import CreateOrderModal from '../../assets/modal/CreateOrderModal';
+import OrderDetailModal from '../../assets/modal/OrderDetailModal';
+import axios from 'axios';
 
 const initialList = [
     {
@@ -60,13 +62,13 @@ const initialList = [
 const columns = [
     {
         id: 'orderName',
-        label: 'ออเดอร์',
+        label: 'หมายเลขออเดอร์',
         minWidth: 300,
         align: 'center'
     },
     {
         id: 'orderDateTime',
-        label: 'ออเดอร์ถูกต้องตอนเวลา',
+        label: 'ออเดอร์ถูกสร้างเมื่อ',
         minWidth: 100,
         align: 'center',
     },
@@ -91,22 +93,12 @@ const columns = [
     },
 ];
 
-const rows = [
-    createData('1', '2025-05-08T14:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB12'),
-    createData('2', '2025-05-08T15:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB13'),
-    createData('3', '2025-05-08T16:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB14'),
-    createData('4', '2025-05-08T17:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB15'),
-    createData('5', '2025-05-08T18:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB12'),
-    createData('6', '2025-05-08T19:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB13'),
-    createData('7', '2025-05-08T20:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB14'),
-    createData('8', '2025-05-08T21:30:00', 1500, 'ไดโน เซบาสเตียน', 'AB15'),
-];
 
 function createData(orderId, orderDateTime, orderTotalPrice, customerName, editAction) {
-    let orderName = "ออเดอร์ " + orderId
+    let orderName = orderId.slice(orderId.length - 5) + orderDateTime.replaceAll("/", "")
     orderDateTime = orderDateTime.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     orderTotalPrice = formatNumberWithCommasAndDecimals(orderTotalPrice) + " บาท"
-    return { orderName, orderDateTime, orderTotalPrice, customerName, editAction };
+    return { orderId, orderName, orderDateTime, orderTotalPrice, customerName, editAction };
 }
 
 function formatNumberWithCommasAndDecimals(value) {
@@ -117,26 +109,181 @@ function formatNumberWithCommasAndDecimals(value) {
 }
 
 function Orders() {
+
+    useEffect(() => {
+        async function fetchOrderData() {
+            fetch("http://localhost:8000/api/v1/order/")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then((data) => {
+                    const allList = []
+                    data.data.map((map) => {
+                        allList.push(createData(map.id, map.createdDate, map.totalPrice, map.customerName, "AB" + map.id))
+                    })
+                    setDataList(allList)
+
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error)
+                });
+        }
+        async function fetchCustomer() {
+            fetch("http://localhost:8000/api/v1/customer/")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then((data) => {
+                    setCustomerList(data.data)
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error)
+                });
+        }
+        async function fetchProduct() {
+            fetch("http://localhost:8000/api/v1/product/getAll")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then((data) => {
+                    setProductList(data.data)
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error)
+                });
+        }
+        async function fetchCategory() {
+            axios.get("http://localhost:8000/api/v1/category/getAll")
+                .then((data) => {
+                    const allList = []
+                    const dataList = data.data.data
+                    allList.push({ "id": "ทั้งหมด", "name": "ทั้งหมด" })
+                    dataList.map((item) => {
+                        if(!item.is_deleted) {
+                            allList.push(item)
+                        }
+                    })
+                    setCategoryList(allList)
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error)
+                });
+        }
+        fetchOrderData()
+        fetchCustomer()
+        fetchProduct()
+        fetchCategory()
+    }, [])
+
+
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortedList, setSortedList] = useState(initialList);
-    const [dataList, setDataList] = useState(rows)
+    const [dataList, setDataList] = useState([])
+    const [productList, setProductList] = useState([])
+    const [categoryList, setCategoryList] = useState([])
+    const [customerList, setCustomerList] = useState([])
+    const [toggleOrderDetailModal, setToggleOrderDetailModel] = useState(false)
+    const [orderDetail, setOrderDetail] = useState({
+        id: '',
+        customerName: '',
+        createdDate: '',
+        totalPrice: '',
+        deliveryFee: '',
+        productList: [{
+            productId: '',
+            productName: '',
+            productAmount: '',
+            totalProductPrice: ''
+        }]
+    });
+
+    useEffect(() => {
+        if (orderDetail.id) setLoading(false)
+    }, [orderDetail])
+
     const [loading, setLoading] = useState(false)
     const [createOrderModalOpen, setCreateOrderModalOpen] = useState(false)
-    const [createProductSuccess, setCreateProductSuccess] = useState(false);
-    const [createProductError, setCreateProductError] = useState(false);
-    const [updateForm, setUpdateForm] = useState({
-        name: '',
-    })
+    const [notificationPopup, setNotificationPopup] = useState(false)
+    const [notificationType, setNotificationType] = useState("")
+    const [notificationMessage, setNotificationMessage] = useState("")
 
-    function buildUpdateData(row) {
-        let customerName = row.customerName
-        // TODO: Get Product by productId
-        let productData = {
-            name: customerName,
-        }
-        setUpdateForm(productData)
-        console.log(updateForm)
+    async function fetchOrderById(orderId) {
+        axios.post("http://localhost:8000/api/v1/order/get", {
+            orderId: orderId
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+            .then((data) => {
+                let response = data.data.data
+                setOrderDetail(response)
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+            });
+    }
+
+    function fetchOrder() {
+        axios.get("http://localhost:8000/api/v1/order/")
+            .then((data) => {
+                const allList = []
+                const dataList = data.data.data
+                dataList.map((map) => {
+                    allList.push(createData(map.id, map.createdDate, map.totalPrice, map.customerName, "AB" + map.id))
+                })
+                setDataList(allList)
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+            });
+    }
+
+    async function buildUpdateData(row) {
+        await fetchOrderById(row.orderId)
+        setToggleOrderDetailModel(true)
+        setLoading(true)
+    }
+
+    function handleSubmitCreateOrder(customerName, customerPhone, isSaveCustomer, selectedProducts) {
+        setLoading(true)
+        let productList = []
+        selectedProducts.map((item) => {
+            productList.push({
+                productId: item.id,
+                productName: item.name,
+                productAmount: item.quantity
+            })
+        })
+        axios.post("http://localhost:8000/api/v1/order/create", {
+            customerName: customerName,
+            customerPhoneNo: customerPhone,
+            isRememberCustomer: isSaveCustomer,
+            productList: productList
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+            .then((data) => {
+                setLoading(false)
+                setCreateOrderModalOpen(false)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("สร้างคำสั่งซื้อสำเร็จค่ะ")
+                fetchOrder()
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+                setLoading(false)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("สร้างคำสั่งซื้อไม่สำเร็จค่ะ")
+            });
     }
 
 
@@ -148,17 +295,6 @@ function Orders() {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
-
-    function onAddCategory(form) {
-        setLoading(true)
-        console.log(form)
-        // send to backend for create product
-        // while create product calling backend API setLoading(true)
-        // after done 
-        setTimeout(() => {
-            setLoading(false)
-        }, 2000)
-    }
 
     function handleToggle(sortedItem) {
         let isClear = false
@@ -209,22 +345,13 @@ function Orders() {
                         </Grid>
                         <Grid item size={6}>
                             <Snackbar
-                                open={createProductSuccess}
+                                open={notificationPopup}
                                 autoHideDuration={2000}
-                                onClose={() => setCreateProductSuccess(false)}
+                                onClose={() => setNotificationPopup(false)}
                                 TransitionComponent={Fade}
                                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                             >
-                                <Alert variant="filled" onClose={() => setCreateProductSuccess(false)} severity="success">เพิ่มหมวดหมู่สินค้าสำเร็จค่ะ</Alert>
-                            </Snackbar>
-                            <Snackbar
-                                open={createProductError}
-                                autoHideDuration={2000}
-                                onClose={() => setCreateProductError(false)}
-                                TransitionComponent={Fade}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                            >
-                                <Alert variant="filled" onClose={() => setCreateProductError(false)} severity="error">เพิ่มหมวดหมู่สินค้าไม่สำเร็จค่ะ</Alert>
+                                <Alert variant="filled" onClose={() => setNotificationPopup(false)} severity={notificationType}>{notificationMessage}</Alert>
                             </Snackbar>
                         </Grid>
                     </Grid>
@@ -346,7 +473,8 @@ function Orders() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
-                <CreateOrderModal open={createOrderModalOpen} onClose={(current) => setCreateOrderModalOpen(!current)}/>
+                <CreateOrderModal onSubmit={handleSubmitCreateOrder} productList={productList} categoryList={categoryList} open={createOrderModalOpen} onClose={(current) => setCreateOrderModalOpen(!current)} customerList={customerList} loading={loading} setLoading={setLoading} />
+                <OrderDetailModal open={toggleOrderDetailModal} orderData={orderDetail} onClose={(current) => setToggleOrderDetailModel(!current)} loading={loading} setNotificationPopup={setNotificationPopup} setNotificationType={setNotificationType} setNotificationMessage={setNotificationMessage} />
             </Paper>
         </div>
     )

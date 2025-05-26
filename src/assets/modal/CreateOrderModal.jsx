@@ -18,24 +18,11 @@ import {
     Checkbox,
     FormControlLabel,
     styled,
-    Grid
+    Grid,
 } from "@mui/material";
 import { Delete, Close } from "@mui/icons-material";
 import { useState } from "react";
-
-const productList = [
-    { id: 1, name: "เยลลี่รสชาติแอปเปิ้ล", category: "เยลลี่", stock: 20, price: 80 },
-    { id: 2, name: "เยลลี่รสชาติส้ม", category: "เยลลี่", stock: 15, price: 80 },
-    { id: 3, name: "คุกกี้กัญชารสมิ้น", category: "คุกกี้", stock: 5, price: 80 },
-    { id: 4, name: "บราวนี่ช็อคโกแลต", category: "บราวนี่", stock: 10, price: 100 },
-    { id: 5, name: "บราวนี่ส้ม", category: "บราวนี่", stock: 6, price: 100 },
-    { id: 6, name: "บราวนี่กาแฟ", category: "บราวนี่", stock: 6, price: 100 },
-    { id: 7, name: "คุกกี้กัญชารสช็อคโกแลต", category: "คุกกี้", stock: 10, price: 80 },
-    { id: 8, name: "คุกกี้กัญชารสโอริโอ้", category: "คุกกี้", stock: 10, price: 80 },
-    { id: 9, name: "คุกกี้กัญชารสลัมเลซิน", category: "คุกกี้", stock: 10, price: 80 }
-];
-
-const categories = ["ทั้งหมด", "เยลลี่", "คุกกี้", "บราวนี่"];
+import CustomerListModal from "./CustomerListModal";
 
 const StyledButton = styled(Button)(() => ({
     backgroundColor: "#3a3c41",
@@ -48,27 +35,53 @@ const StyledButton = styled(Button)(() => ({
     }
 }));
 
-export default function CreateOrderModal({ open, onClose }) {
+export default function CreateOrderModal({ open, onClose, customerList, productList, categoryList, onSubmit, loading, setLoading }) {
     const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [customerName, setCustomerName] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
     const [saveCustomer, setSaveCustomer] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isCustomerImported, setIsCustomerImported] = useState(false);
+    const [customerModalOpen, setCustomerModalOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     const handleCreateOrderClick = () => {
+        setLoading(true)
         setConfirmOpen(true);
     };
 
     const handleConfirmSubmit = () => {
-        console.log("Order Submitted", { customerName, selectedProducts });
         setConfirmOpen(false);
-        onClose();
+        onSubmit(customerName, customerPhone, saveCustomer, selectedProducts)
+        handleClearModal()
     };
+
+    const handleClearModal = () => {
+        handleClearForm()
+        setSelectedCategory("ทั้งหมด");
+        setSelectedProducts([]);
+        setSearchTerm("");
+        setCustomerModalOpen(false);
+        setConfirmOpen(false);
+    }
+
+    const handleClearForm = () => {
+        setCustomerName("");
+        setCustomerPhone("");
+        setIsCustomerImported(false);
+    }
+
+    const handleSubmitCustomer = (customer) => {
+        setCustomerModalOpen(false);
+        setCustomerName(customer.name);
+        setCustomerPhone(customer.phone);
+        setIsCustomerImported(true);
+    }
 
 
     const filteredProducts = productList.filter((p) => {
-        const matchesCategory = selectedCategory === "ทั้งหมด" || p.category === selectedCategory;
+        const matchesCategory = selectedCategory === "ทั้งหมด" || p.categoryId === selectedCategory;
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
@@ -96,11 +109,6 @@ export default function CreateOrderModal({ open, onClose }) {
         0
     );
 
-    const handleSubmit = () => {
-        console.log("Order Submitted", { customerName, selectedProducts });
-        onClose();
-    };
-
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle sx={{ fontWeight: "bold", display: "flex", justifyContent: "space-between" }}>
@@ -117,19 +125,36 @@ export default function CreateOrderModal({ open, onClose }) {
                             fullWidth
                             label="ชื่อลูกค้า"
                             value={customerName}
+                            disabled={isCustomerImported}
                             onChange={(e) => setCustomerName(e.target.value)}
+                            sx={{ mb: 1 }}
+                        />
+                    </Grid>
+                    <Grid item size={12}>
+                        <TextField
+                            fullWidth
+                            label="เบอร์โทรศัพท์ลูกค้า"
+                            value={customerPhone}
+                            disabled={isCustomerImported || !saveCustomer}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
                             sx={{ mb: 1 }}
                         />
                     </Grid>
                 </Grid>
                 <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                    <Button variant="contained" sx={{ backgroundColor: "#3a3c41", borderRadius: 2 }}>
-                        เลือกข้อมูลลูกค้า
-                    </Button>
+                    <Box>
+                        <Button variant="contained" onClick={() => setCustomerModalOpen(true)} sx={{ backgroundColor: "#3a3c41", borderRadius: 2 }}>
+                            เลือกข้อมูลลูกค้า
+                        </Button>
+                        <Button variant="contained" onClick={() => handleClearForm()} sx={{ backgroundColor: "#3a3c41", borderRadius: 2, ml: 1 }}>
+                            เคลียร์ข้อมูลลูกค้า
+                        </Button>
+                    </Box>
                     <FormControlLabel
                         control={
                             <Checkbox
                                 checked={saveCustomer}
+                                disabled={isCustomerImported}
                                 onChange={(e) => setSaveCustomer(e.target.checked)}
                             />
                         }
@@ -147,9 +172,9 @@ export default function CreateOrderModal({ open, onClose }) {
                     fullWidth
                     sx={{ mb: 2 }}
                 >
-                    {categories.map((cat) => (
-                        <MenuItem key={cat} value={cat}>
-                            {cat}
+                    {categoryList.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.id}>
+                            {cat.name}
                         </MenuItem>
                     ))}
                 </Select>
@@ -176,7 +201,7 @@ export default function CreateOrderModal({ open, onClose }) {
                         {filteredProducts.map((product) => (
                             <TableRow key={product.id}>
                                 <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.stock}</TableCell>
+                                <TableCell>{product.amount}</TableCell>
                                 <TableCell>{product.price} บาท</TableCell>
                                 <TableCell align="right">
                                     <Button
@@ -242,7 +267,7 @@ export default function CreateOrderModal({ open, onClose }) {
             </DialogContent>
 
             <DialogActions>
-                <StyledButton onClick={handleCreateOrderClick}>สร้างออเดอร์</StyledButton>
+                <StyledButton loading={loading} disabled={loading} loadingPosition="end" onClick={handleCreateOrderClick}>สร้างออเดอร์</StyledButton>
             </DialogActions>
             <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
                 <DialogTitle fontWeight="bold">สรุปออเดอร์</DialogTitle>
@@ -276,6 +301,7 @@ export default function CreateOrderModal({ open, onClose }) {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <CustomerListModal onSubmit={handleSubmitCustomer} open={customerModalOpen} customerList={customerList} onClose={(current) => setCustomerModalOpen(!current)} />
         </Dialog>
     );
 }

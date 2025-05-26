@@ -66,10 +66,10 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading, ca
         );
     };
 
-    const handleSubmit = () => {
-        // Do something with selectedProducts
-        console.log("Submitting stock updates:", selectedProducts);
-        onClose();
+    const handleClearForm = () => {
+        setSelectedCategory("");
+        setSelectedProducts([]);
+        setSearchTerm("");
     };
 
     return (
@@ -182,7 +182,10 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading, ca
             </DialogContent>
 
             <DialogActions>
-                <StyledButton variant="contained" loading={loading} loadingPosition="end" onClick={() => onSubmit(selectedProducts)}>
+                <StyledButton variant="contained" loading={loading} loadingPosition="end" onClick={() => {
+                    onSubmit(selectedProducts)
+                    handleClearForm()
+                }}>
                     เพิ่มสต๊อก
                 </StyledButton>
             </DialogActions>
