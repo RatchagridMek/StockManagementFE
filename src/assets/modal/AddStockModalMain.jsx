@@ -21,21 +21,6 @@ import { Delete } from "@mui/icons-material";
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 
-const productList = [
-    { id: 1, name: "เยลลี่รสชาติแอปเปิ้ล", category: "เยลลี่", stock: 20 },
-    { id: 2, name: "เยลลี่รสชาติส้ม", category: "เยลลี่", stock: 15 },
-    { id: 3, name: "คุกกี้กัญชารสมิ้น", category: "คุกกี้", stock: 5 },
-    { id: 4, name: "บราวนี่ช็อคโกแลต", category: "บราวนี่", stock: 10 },
-    { id: 5, name: "บราวนี่ส้ม", category: "บราวนี่", stock: 6 },
-    { id: 6, name: "บราวนี่กาแฟ", category: "บราวนี่", stock: 6 },
-    { id: 7, name: "คุกกี้กัญชารสช็อคโกแลต", category: "คุกกี้", stock: 10 },
-    { id: 8, name: "คุกกี้กัญชารสโอริโอ้", category: "คุกกี้", stock: 10 },
-    { id: 9, name: "คุกกี้กัญชารสลัมเลซิน", category: "คุกกี้", stock: 10 },
-
-];
-
-const categories = ["ทั้งหมด", "เยลลี่", "คุกกี้", "บราวนี่"];
-
 const StyledButton = styled(Button)(({ theme }) => ({
     backgroundColor: '#3a3c41',
     color: '#fff',
@@ -47,16 +32,16 @@ const StyledButton = styled(Button)(({ theme }) => ({
     },
 }));
 
-export default function AddStockModalMain({ open, onClose, onSubmit, loading }) {
-    const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
+export default function AddStockModalMain({ open, onClose, onSubmit, loading, categoryList, productList }) {
+    const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredProducts =
-    (selectedCategory === "ทั้งหมด"
+    (selectedCategory === ""
         ? productList
-        : productList.filter((p) => p.category === selectedCategory)
-    ).filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        : productList.filter((p) => p.categoryId === selectedCategory)
+    ).filter((p) => p.productName.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const handleSelectProduct = (product) => {
         if (!selectedProducts.find((p) => p.id === product.id)) {
@@ -81,10 +66,10 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading }) 
         );
     };
 
-    const handleSubmit = () => {
-        // Do something with selectedProducts
-        console.log("Submitting stock updates:", selectedProducts);
-        onClose();
+    const handleClearForm = () => {
+        setSelectedCategory("");
+        setSelectedProducts([]);
+        setSearchTerm("");
     };
 
     return (
@@ -105,9 +90,9 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading }) 
                     fullWidth
                     sx={{ mb: 3 }}
                 >
-                    {categories.map((cat) => (
-                        <MenuItem key={cat} value={cat}>
-                            {cat}
+                    {categoryList.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.id}>
+                            {cat.name}
                         </MenuItem>
                     ))}
                 </Select>
@@ -136,8 +121,8 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading }) 
                     <TableBody>
                         {filteredProducts.map((product) => (
                             <TableRow key={product.id}>
-                                <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.stock}</TableCell>
+                                <TableCell>{product.productName}</TableCell>
+                                <TableCell>{product.productAmount}</TableCell>
                                 <TableCell align="right">
                                     <Button
                                         variant="contained"
@@ -173,7 +158,7 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading }) 
                     <TableBody>
                         {selectedProducts.map((product) => (
                             <TableRow key={product.id}>
-                                <TableCell>{product.name}</TableCell>
+                                <TableCell>{product.productName}</TableCell>
                                 <TableCell>
                                     <TextField
                                         type="number"
@@ -197,7 +182,10 @@ export default function AddStockModalMain({ open, onClose, onSubmit, loading }) 
             </DialogContent>
 
             <DialogActions>
-                <StyledButton variant="contained" loading={loading} loadingPosition="end" onClick={onSubmit}>
+                <StyledButton variant="contained" loading={loading} loadingPosition="end" onClick={() => {
+                    onSubmit(selectedProducts)
+                    handleClearForm()
+                }}>
                     เพิ่มสต๊อก
                 </StyledButton>
             </DialogActions>

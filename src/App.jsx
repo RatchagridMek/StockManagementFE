@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Product from './page/products/product.jsx';
 import Category from './page/categorys/category.jsx'
 import { Routes, Route } from 'react-router-dom'
+import Orders from './page/orders/orders.jsx'
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
           <Routes>
             <Route path="/products" element={<Product />} />
             <Route path="/categorys" element={<Category />} />
+            <Route path="/orders" element={<Orders />} />
           </Routes>
         </div>
       </div>

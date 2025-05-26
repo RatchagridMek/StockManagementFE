@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function CreateProductModal({ open, onClose, onSubmit, loading }) {
+export default function CreateProductModal({ open, onClose, onSubmit, loading, categoryList }) {
+
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -42,7 +43,7 @@ export default function CreateProductModal({ open, onClose, onSubmit, loading })
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
-            {/* # free spacing block */}
+          {/* # free spacing block */}
           <div sx={{ display: 'block' }}></div>
           {/* ชื่อสินค้า / รายละเอียด */}
           <Grid item size={12}>
@@ -78,9 +79,11 @@ export default function CreateProductModal({ open, onClose, onSubmit, loading })
                 onChange={handleChange}
                 label="หมวดหมู่ของสินค้า"
               >
-                <MenuItem value="เยลลี่">เยลลี่</MenuItem>
-                <MenuItem value="ขนม">ขนม</MenuItem>
-                <MenuItem value="เครื่องดื่ม">เครื่องดื่ม</MenuItem>
+                {categoryList.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
