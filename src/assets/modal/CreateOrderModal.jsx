@@ -201,7 +201,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         {filteredProducts.map((product) => (
                             <TableRow key={product.id}>
                                 <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.amount}</TableCell>
+                                <TableCell>{product.amount} ชิ้น</TableCell>
                                 <TableCell>{product.price} บาท</TableCell>
                                 <TableCell align="right">
                                     <Button

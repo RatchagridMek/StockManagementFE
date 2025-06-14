@@ -506,13 +506,13 @@ function Category() {
                                                     case 'Active':
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
-                                                                <ActiveButton>Active</ActiveButton>
+                                                                <ActiveButton></ActiveButton>
                                                             </TableCell>
                                                         );
                                                     case 'Deleted':
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
-                                                                <DeletedButton>Deleted</DeletedButton>
+                                                                <DeletedButton></DeletedButton>
                                                             </TableCell>
                                                         );
                                                 }
