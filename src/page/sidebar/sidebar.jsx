@@ -4,6 +4,7 @@ import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
 import ProductionQuantityLimitsOutlinedIcon from '@mui/icons-material/ProductionQuantityLimitsOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { Link, useLocation } from "react-router-dom";
 
 
@@ -14,7 +15,9 @@ function AppSidebar({ isCollapsed }) {
 
     return (
         <Sidebar isCollapse={isCollapsed} showProfile={false} themeColor={"#FDF8F8"} textColor={"#000000"} width={"270px"}>
-            <br/>
+            <br />
+            <br />
+            <br />
             <MenuItem
                 icon={<CottageOutlinedIcon />}
                 component={Link}
@@ -45,6 +48,14 @@ function AppSidebar({ isCollapsed }) {
                 badge={false}
                 isSelected={currentPath === "/categorys"}>
                 Category
+            </MenuItem>
+            <MenuItem
+                icon={<PersonOutlineIcon />}
+                component={Link}
+                link="/customers"
+                badge={false}
+                isSelected={currentPath === "/customers"}>
+                Customer
             </MenuItem>
         </Sidebar>
     );

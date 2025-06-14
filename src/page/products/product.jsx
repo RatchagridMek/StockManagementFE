@@ -25,6 +25,7 @@ import Snackbar from '@mui/material/Snackbar';
 import UpdateProductModal from '../../assets/modal/UpdateProductModal';
 import AddStockModalMain from '../../assets/modal/AddStockModalMain';
 import { useEffect } from 'react';
+import TextField from '@mui/material/TextField';
 
 const initialList = [
     {
@@ -53,27 +54,20 @@ const initialList = [
     },
     {
         label: '',
-        type: 'empty',
-        minWidth: 100,
-        align: 'center',
-        selected: false
-    },
-    {
-        label: '',
-        type: 'empty',
-        minWidth: 100,
+        type: 'searchBar',
+        minWidth: 400,
         align: 'center',
         selected: false
     },
     {
         type: 'AddStockbutton',
-        minWidth: 150,
+        minWidth: 50,
         align: 'center',
         selected: false
     },
     {
         type: 'CreateProductbutton',
-        minWidth: 150,
+        minWidth: 50,
         align: 'center',
         selected: false
     }
@@ -192,7 +186,7 @@ function Product() {
                                 )
                             )
                         }
-                        if (Number(item.amount) < 5) {
+                        if (Number(item.amount) <= 5) {
                             lowStockRow.push(
                                 createData(
                                     productId, productCategory,
@@ -258,6 +252,7 @@ function Product() {
     const [notificationMessage, setNotificationMessage] = useState("")
     const [toggleUpdateProductModal, setToggleUpdateProductModal] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
+    const [search, setSearch] = useState("")
     const [confirmType, setConfirmType] = useState("")
     const [confirmModalToggle, setConfirmModalToggle] = useState(false)
     const [confirmActionId, setConfirmActionId] = useState("")
@@ -269,6 +264,8 @@ function Product() {
         costPrice: '',
         salePrice: '',
     })
+
+    const filteredProduct = search == "" ? dataList : dataList.filter((item) => item.productName.toLowerCase().includes(search.toLowerCase()))
 
     function handleUpdateProduct(form) {
         // TODO: Update Product by productId
@@ -540,7 +537,7 @@ function Product() {
                             )
                         )
                     }
-                    if (Number(item.amount) < 5) {
+                    if (Number(item.amount) <= 5) {
                         lowStockRow.push(
                             createData(
                                 productId, productCategory,
@@ -661,6 +658,23 @@ function Product() {
                                             </TableCell>
                                         )
                                     }
+                                    else if (sortedItem.type === 'searchBar') {
+                                        return (
+                                            <TableCell
+                                                align={sortedItem.align}
+                                                style={{ minWidth: sortedItem.minWidth }}
+                                            >
+                                                <TextField
+                                                    fullWidth
+                                                    name="search"
+                                                    label="ค้นหาโดยชื่อสินค้า"
+                                                    value={search}
+                                                    onChange={(e) => setSearch(e.target.value)}
+                                                    variant="outlined"
+                                                />
+                                            </TableCell>
+                                        )
+                                    }
                                     else if (sortedItem.type === 'sortedItem') {
                                         return (
                                             <TableCell
@@ -709,7 +723,7 @@ function Product() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {dataList
+                            {filteredProduct
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => {
                                     return (
@@ -796,20 +810,20 @@ function Product() {
                                 break;
                             }
                         }
-                    }} 
-                    color="success" 
-                    variant="contained"
-                    loading={buttonActionLoading}
-                    loadingPosition="end"
+                    }}
+                        color="success"
+                        variant="contained"
+                        loading={buttonActionLoading}
+                        loadingPosition="end"
                     >
                         ยืนยัน
                     </Button>
                 </DialogActions>
             </Dialog>
             <CreateProductModal categoryList={categoryList} open={toggleCreateProductModal} onClose={(current) => setToggleCreateProductModal(!current)} onSubmit={onAddProduct} loading={loading} />
-            <AddStockModalMain open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} categoryList={categoryList} productList={activedDataList}/>
+            <AddStockModalMain open={toggleAddStockModal} onClose={(current) => setToggleAddStockModal(!current)} onSubmit={onAddStock} loading={loading} categoryList={categoryList} productList={activedDataList} />
             <UpdateProductModal categoryList={categoryList} updateLoading={updateLoading} onSubmit={handleUpdateProduct} open={toggleUpdateProductModal} onClose={(current) => setToggleUpdateProductModal(!current)} updateForm={updateForm} />
-            
+
         </div>
     )
 }
