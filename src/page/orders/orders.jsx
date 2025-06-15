@@ -77,6 +77,18 @@ const columns = [
         label: 'ยอดรวมสินค้าทั้งหมด',
         minWidth: 100,
         align: 'center',
+    },
+    {
+        id: 'orderTotalOriginPrice',
+        label: 'ยอดรวมราคาต้นทุนสินค้า',
+        minWidth: 100,
+        align: 'center',
+    },
+    {
+        id: 'profit',
+        label: 'ยวดรวมกำไร',
+        minWidth: 100,
+        align: 'center',
         format: (value) => value.toFixed(2),
     },
     {
@@ -94,11 +106,14 @@ const columns = [
 ];
 
 
-function createData(orderId, orderDateTime, orderTotalPrice, customerName, editAction) {
-    let orderName = orderId.slice(orderId.length - 5) + orderDateTime.replaceAll("/", "")
+function createData(orderId, orderDateTime, orderTotalPrice, totalOriginPrice, customerName, editAction) {
+    // let orderName = orderId.slice(orderId.length - 5) + orderDateTime.replaceAll("/", "")
+    let orderName = orderId
     orderDateTime = orderDateTime.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     orderTotalPrice = formatNumberWithCommasAndDecimals(orderTotalPrice) + " บาท"
-    return { orderId, orderName, orderDateTime, orderTotalPrice, customerName, editAction };
+    let orderTotalOriginPrice = formatNumberWithCommasAndDecimals(totalOriginPrice) + " บาท"
+    let profit = formatNumberWithCommasAndDecimals(parseFloat(orderTotalPrice) - parseFloat(totalOriginPrice)) + " บาท"
+    return { orderId, orderName, orderDateTime, orderTotalPrice, orderTotalOriginPrice, profit, customerName, editAction };
 }
 
 function formatNumberWithCommasAndDecimals(value) {
@@ -120,7 +135,7 @@ function Orders() {
                 .then((data) => {
                     const allList = []
                     data.data.map((map) => {
-                        allList.push(createData(map.id, map.createdDate, map.totalPrice, map.customerName, "AB" + map.id))
+                        allList.push(createData(map.id, map.createdDate, map.totalPrice, map.totalOriginPrice, map.customerName, "AB" + map.id))
                     })
                     setDataList(allList)
 
@@ -198,7 +213,13 @@ function Orders() {
             productName: '',
             productAmount: '',
             totalProductPrice: ''
-        }]
+        }],
+        giveawayList: [{
+            productId: '',
+            productName: '',
+            productAmount: '',
+            totalProductPrice: ''
+        }],
     });
 
     useEffect(() => {
@@ -234,7 +255,7 @@ function Orders() {
                 const allList = []
                 const dataList = data.data.data
                 dataList.map((map) => {
-                    allList.push(createData(map.id, map.createdDate, map.totalPrice, map.customerName, "AB" + map.id))
+                    allList.push(createData(map.id, map.createdDate, map.totalPrice, map.totalOriginPrice, map.customerName, "AB" + map.id))
                 })
                 setDataList(allList)
             })
@@ -256,14 +277,15 @@ function Orders() {
             productList.push({
                 productId: item.id,
                 productName: item.name,
-                productAmount: item.quantity
+                productAmount: item.quantity,
+                isGiveaway: item.isGiveaway
             })
         })
         axios.post("http://localhost:8000/api/v1/order/create", {
             customerName: customerName,
             customerPhoneNo: customerPhone,
             isRememberCustomer: isSaveCustomer,
-            productList: productList
+            productList: productList,
         }, {
             headers: {
                 "Content-Type": "application/json",

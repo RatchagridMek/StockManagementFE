@@ -43,6 +43,12 @@ export default function OrderDetailModal({ open, onClose, orderData, loading, se
             productName: '',
             productAmount: '',
             totalProductPrice: ''
+        }],
+        giveawayList: [{
+            productId: '',
+            productName: '',
+            productAmount: '',
+            totalProductPrice: ''
         }]
     });
 
@@ -109,7 +115,8 @@ export default function OrderDetailModal({ open, onClose, orderData, loading, se
             ) : (
                 <Box>
                     <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-                        รายละเอียด {order.id.slice(order.id.length - 5) + order.createdDate.replaceAll("/", "")}
+                        {/* รายละเอียด {order.id.slice(order.id.length - 5) + order.createdDate.replaceAll("/", "")} */}
+                        หมายเลขออเดอร์ {order.id}
                     </DialogTitle>
                     <DialogContent sx={{ fontSize: '1rem' }}>
                         <Box display="flex" justifyContent="space-between" mb={1}>
@@ -132,6 +139,28 @@ export default function OrderDetailModal({ open, onClose, orderData, loading, se
                                             </TableCell>
                                             <TableCell align="right" sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
                                                 {product.totalProductPrice} บาท
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+
+                        <Box display="flex" justifyContent="space-between" mb={1} mt={2}>
+                            <Typography fontWeight="bold" fontSize="1rem">รายการของแถม</Typography>
+                            <Typography fontWeight="bold" fontSize="1rem">ราคา (บาท)</Typography>
+                        </Box>
+
+                        <TableContainer component="div" sx={{ my: 1 }}>
+                            <Table size="small">
+                                <TableBody>
+                                    {order.giveawayList.map((giveaway) => (
+                                        <TableRow key={giveaway.productId}>
+                                            <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
+                                                {giveaway.productName} x {giveaway.productAmount}
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
+                                                {giveaway.totalProductPrice} บาท
                                             </TableCell>
                                         </TableRow>
                                     ))}
