@@ -71,6 +71,11 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
         setCustomerPhone("");
         setIsCustomerImported(false);
     }
+    
+    const handleCancleConfirm = () => {
+        setConfirmOpen(false);
+        setLoading(false)
+    }
 
     const handleSubmitCustomer = (customer) => {
         setCustomerModalOpen(false);
@@ -88,7 +93,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
 
     const handleSelectProduct = (product) => {
         if (!selectedProducts.find((p) => p.id === product.id)) {
-            setSelectedProducts([...selectedProducts, { ...product, quantity: 1 }]);
+            setSelectedProducts([...selectedProducts, { ...product, quantity: 1, isGiveaway: false }]);
         }
     };
 
@@ -105,9 +110,14 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
     };
 
     const total = selectedProducts.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + (item.isGiveaway ? 0 : item.price * item.quantity),
         0
     );
+
+    const originTotal = selectedProducts.reduce(
+        (sum, item) => sum + (item.stockPrice * item.quantity),
+        0
+    )
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -201,13 +211,13 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         {filteredProducts.map((product) => (
                             <TableRow key={product.id}>
                                 <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.amount} ชิ้น</TableCell>
+                                <TableCell>{product.amount} ชิ้น {product.amount < 1 ? "(สินค้าหมด)" : ""}</TableCell>
                                 <TableCell>{product.price} บาท</TableCell>
                                 <TableCell align="right">
                                     <Button
                                         variant="contained"
                                         onClick={() => handleSelectProduct(product)}
-                                        disabled={selectedProducts.some((p) => p.id === product.id)}
+                                        disabled={selectedProducts.some((p) => p.id === product.id) || product.amount < 1}
                                         sx={{
                                             backgroundColor: "#3A3C41",
                                             color: "#FFFFFF",
@@ -234,6 +244,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                             <TableCell>จำนวน</TableCell>
                             <TableCell>ราคาต่อหน่วย</TableCell>
                             <TableCell>ราคารวม</TableCell>
+                            <TableCell></TableCell>
                             <TableCell align="right">ลบ</TableCell>
                         </TableRow>
                     </TableHead>
@@ -243,15 +254,51 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                 <TableCell>{item.name}</TableCell>
                                 <TableCell>
                                     <TextField
-                                        type="number"
+                                        type="text"
                                         size="small"
                                         value={item.quantity}
-                                        onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                                        inputProps={{ min: 1 }}
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value;
+
+                                            if (rawValue === "") {
+                                                handleQuantityChange(item.id, "");
+                                                return;
+                                            }
+
+                                            const parsed = parseInt(rawValue, 10);
+                                            if (!isNaN(parsed)) {
+                                                handleQuantityChange(item.id, parsed);
+                                            }
+                                        }}
+                                        onBlur={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            if (isNaN(value) || value < 1) {
+                                                handleQuantityChange(item.id, 1);
+                                            } else if (value > item.amount) {
+                                                handleQuantityChange(item.id, item.amount);
+                                            }
+                                        }}
                                     />
                                 </TableCell>
                                 <TableCell>{item.price} บาท</TableCell>
                                 <TableCell>{item.price * item.quantity} บาท</TableCell>
+                                <TableCell align="right">
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={item.isGiveaway}
+                                                onChange={(e) => {
+                                                    setSelectedProducts((prev) =>
+                                                        prev.map((p) =>
+                                                            p.id === item.id ? { ...p, isGiveaway: e.target.checked } : p
+                                                        )
+                                                    );
+                                                }}
+                                            />
+                                        }
+                                        label="สินค้าแถม"
+                                    />
+                                </TableCell>
                                 <TableCell align="right">
                                     <IconButton onClick={() => handleRemoveProduct(item.id)}>
                                         <Delete />
@@ -261,6 +308,9 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         ))}
                     </TableBody>
                 </Table>
+                <Typography align="right" fontWeight="bold" color="red">
+                    ราคาต้นทุนรวม {originTotal.toLocaleString()} บาท
+                </Typography>
                 <Typography align="right" fontWeight="bold">
                     ราคารวม {total.toLocaleString()} บาท
                 </Typography>
@@ -269,7 +319,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
             <DialogActions>
                 <StyledButton loading={loading} disabled={loading} loadingPosition="end" onClick={handleCreateOrderClick}>สร้างออเดอร์</StyledButton>
             </DialogActions>
-            <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+            <Dialog open={confirmOpen} onClose={() => handleCancleConfirm()}>
                 <DialogTitle fontWeight="bold">สรุปออเดอร์</DialogTitle>
                 <DialogContent dividers>
                     <Typography>ชื่อลูกค้า: <b>{customerName || "ไม่ระบุ"}</b></Typography>
@@ -277,7 +327,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         <TableBody>
                             {selectedProducts.map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell>{item.name} x {item.quantity}</TableCell>
+                                    <TableCell>{item.name} x {item.quantity} {item.isGiveaway ? "(สินค้าแถม)" : ""}</TableCell>
                                     <TableCell align="right">
                                         {item.price * item.quantity} บาท
                                     </TableCell>
@@ -289,14 +339,20 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                     {total.toLocaleString()} บาท
                                 </TableCell>
                             </TableRow>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: "bold", color: "green" }}>ราคาต้นทุนรวม</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: "bold", color: "green" }}>
+                                    {originTotal.toLocaleString()} บาท
+                                </TableCell>
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setConfirmOpen(false)} color="error" variant="contained">
+                    <Button onClick={() => handleCancleConfirm()} color="error" variant="contained">
                         ยกเลิกการสร้างออเดอร์
                     </Button>
-                    <Button onClick={handleConfirmSubmit} color="success" variant="contained">
+                    <Button onClick={() => handleConfirmSubmit()} color="success" variant="contained">
                         ยืนยันการสร้างออเดอร์
                     </Button>
                 </DialogActions>
