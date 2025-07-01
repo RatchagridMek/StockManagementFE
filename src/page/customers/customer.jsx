@@ -225,7 +225,13 @@ function Customers() {
                 console.error("Fetch error:", error)
                 setNotificationPopup(true)
                 setNotificationType('error')
-                setNotificationMessage('Create customer failed')
+                switch (error.response.data.statusCd) {
+                    case "P2002":
+                        setNotificationMessage("ชื่อ-นามสกุลลูกค้ามีอยู่แล้วในระบบค่ะ")
+                        break;
+                    default:
+                        setNotificationMessage("Create customer failed with code : " + error.response.data.statusCd)
+                }
                 setCreateCustomerModalOpen(false)
                 setCreateCustomerLoading(false)
             });

@@ -35,9 +35,18 @@ const StyledButton = styled(Button)(() => ({
     }
 }));
 
+const orderChannelList = [
+    "ONLINE",
+    "INSTAGRAM",
+    "LINE",
+    "FACEBOOK",
+    "TWITTER"
+]
+
 export default function CreateOrderModal({ open, onClose, customerList, productList, categoryList, onSubmit, loading, setLoading }) {
     const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [confirmProducts, setConfirmProducts] = useState([]);
     const [customerName, setCustomerName] = useState("");
     const [customerPhone, setCustomerPhone] = useState("");
     const [saveCustomer, setSaveCustomer] = useState(false);
@@ -45,15 +54,17 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
     const [isCustomerImported, setIsCustomerImported] = useState(false);
     const [customerModalOpen, setCustomerModalOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [selectedOrderChannel, setSelectedOrderChannel] = useState("ONLINE");
 
     const handleCreateOrderClick = () => {
         setLoading(true)
+        setConfirmProducts(selectedProducts.sort((a, b) => Number(a.isGiveaway) - Number(b.isGiveaway)))
         setConfirmOpen(true);
     };
 
     const handleConfirmSubmit = () => {
         setConfirmOpen(false);
-        onSubmit(customerName, customerPhone, saveCustomer, selectedProducts)
+        onSubmit(customerName, customerPhone, saveCustomer, selectedProducts, selectedOrderChannel)
         handleClearModal()
     };
 
@@ -145,7 +156,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                             fullWidth
                             label="เบอร์โทรศัพท์ลูกค้า"
                             value={customerPhone}
-                            disabled={isCustomerImported || !saveCustomer}
+                            disabled={isCustomerImported}
                             onChange={(e) => setCustomerPhone(e.target.value)}
                             sx={{ mb: 1 }}
                         />
@@ -171,6 +182,23 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         label="บันทึกชื่อของลูกค้า"
                     />
                 </Box>
+
+                <Typography fontWeight="bold" sx={{ mb: 1 }}>
+                    ข้อมูลออเดอร์
+                </Typography>
+
+                <Select
+                    value={selectedOrderChannel}
+                    onChange={(e) => setSelectedOrderChannel(e.target.value)}
+                    fullWidth
+                    sx={{ mb: 2 }}
+                >
+                    {orderChannelList.map((channel) => (
+                        <MenuItem key={channel} value={channel}>
+                            {channel}
+                        </MenuItem>
+                    ))}
+                </Select>
 
                 <Typography fontWeight="bold" sx={{ mb: 1 }}>
                     เพิ่มรายการสินค้า
@@ -323,9 +351,10 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                 <DialogTitle fontWeight="bold">สรุปออเดอร์</DialogTitle>
                 <DialogContent dividers>
                     <Typography>ชื่อลูกค้า: <b>{customerName || "ไม่ระบุ"}</b></Typography>
+                    <Typography>เบอร์โทรศัพท์: <b>{customerPhone || "ไม่ระบุ"}</b></Typography>
                     <Table size="small" sx={{ mt: 2 }}>
                         <TableBody>
-                            {selectedProducts.map((item) => (
+                            {confirmProducts.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell>{item.name} x {item.quantity} {item.isGiveaway ? "(สินค้าแถม)" : ""}</TableCell>
                                     <TableCell align="right">
