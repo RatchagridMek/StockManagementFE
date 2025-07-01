@@ -86,7 +86,7 @@ const columns = [
     },
     {
         id: 'profit',
-        label: 'ยวดรวมกำไร',
+        label: 'ยอดรวมกำไร',
         minWidth: 100,
         align: 'center',
         format: (value) => value.toFixed(2),
@@ -208,6 +208,7 @@ function Orders() {
         createdDate: '',
         totalPrice: '',
         deliveryFee: '',
+        orderChannel: '',
         productList: [{
             productId: '',
             productName: '',
@@ -264,13 +265,23 @@ function Orders() {
             });
     }
 
+    function fetchProduct() {
+        axios.get("http://localhost:8000/api/v1/product/getAll")
+            .then((data) => {
+                setProductList(data.data.data)
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+            });
+    }
+
     async function buildUpdateData(row) {
         await fetchOrderById(row.orderId)
         setToggleOrderDetailModel(true)
         setLoading(true)
     }
 
-    function handleSubmitCreateOrder(customerName, customerPhone, isSaveCustomer, selectedProducts) {
+    function handleSubmitCreateOrder(customerName, customerPhone, isSaveCustomer, selectedProducts, selectedOrderChannel) {
         setLoading(true)
         let productList = []
         selectedProducts.map((item) => {
@@ -286,6 +297,7 @@ function Orders() {
             customerPhoneNo: customerPhone,
             isRememberCustomer: isSaveCustomer,
             productList: productList,
+            orderChannel: selectedOrderChannel
         }, {
             headers: {
                 "Content-Type": "application/json",
@@ -298,6 +310,7 @@ function Orders() {
                 setNotificationType("success")
                 setNotificationMessage("สร้างคำสั่งซื้อสำเร็จค่ะ")
                 fetchOrder()
+                fetchProduct()
             })
             .catch((error) => {
                 console.error("Fetch error:", error)
@@ -496,7 +509,7 @@ function Orders() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
                 <CreateOrderModal onSubmit={handleSubmitCreateOrder} productList={productList} categoryList={categoryList} open={createOrderModalOpen} onClose={(current) => setCreateOrderModalOpen(!current)} customerList={customerList} loading={loading} setLoading={setLoading} />
-                <OrderDetailModal open={toggleOrderDetailModal} orderData={orderDetail} onClose={(current) => setToggleOrderDetailModel(!current)} loading={loading} setNotificationPopup={setNotificationPopup} setNotificationType={setNotificationType} setNotificationMessage={setNotificationMessage} />
+                <OrderDetailModal open={toggleOrderDetailModal} orderData={orderDetail} onClose={(current) => setToggleOrderDetailModel(!current)} loading={loading} setLoading={setLoading} setNotificationPopup={setNotificationPopup} setNotificationType={setNotificationType} setNotificationMessage={setNotificationMessage} />
             </Paper>
         </div>
     )
