@@ -4,8 +4,9 @@ import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
 import ProductionQuantityLimitsOutlinedIcon from '@mui/icons-material/ProductionQuantityLimitsOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { Link, useLocation } from "react-router-dom";
-
+import Divider from '@mui/material/Divider';
 
 function AppSidebar({ isCollapsed }) {
 
@@ -14,14 +15,17 @@ function AppSidebar({ isCollapsed }) {
 
     return (
         <Sidebar isCollapse={isCollapsed} showProfile={false} themeColor={"#FDF8F8"} textColor={"#000000"} width={"270px"}>
-            <br/>
+            <br />
+            <br />
+            <br />
             <MenuItem
                 icon={<CottageOutlinedIcon />}
                 component={Link}
-                link="/tes"
+                link="/dashboard"
                 badge={false}>
                 Home
             </MenuItem>
+            <Divider/>
             <MenuItem
                 icon={<ProductionQuantityLimitsOutlinedIcon />}
                 component={Link}
@@ -30,6 +34,7 @@ function AppSidebar({ isCollapsed }) {
                 isSelected={currentPath === "/products"}>
                 Product
             </MenuItem>
+            <Divider/>
             <MenuItem
                 icon={<Inventory2OutlinedIcon />}
                 component={Link}
@@ -38,6 +43,7 @@ function AppSidebar({ isCollapsed }) {
                 isSelected={currentPath === "/orders"}>
                 Order
             </MenuItem>
+            <Divider/>
             <MenuItem
                 icon={<CategoryOutlinedIcon />}
                 component={Link}
@@ -46,6 +52,16 @@ function AppSidebar({ isCollapsed }) {
                 isSelected={currentPath === "/categorys"}>
                 Category
             </MenuItem>
+            <Divider/>
+            <MenuItem
+                icon={<PersonOutlineIcon />}
+                component={Link}
+                link="/customers"
+                badge={false}
+                isSelected={currentPath === "/customers"}>
+                Customer
+            </MenuItem>
+            <Divider/>
         </Sidebar>
     );
 }
