@@ -9,12 +9,16 @@ import Typography from '@mui/material/Typography';
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
 import { areaElementClasses } from '@mui/x-charts/LineChart';
 
-export type StatCardProps = {
+export interface StatCardStruct {
   title: string;
-  value: string;
-  interval: string;
-  trend: 'up' | 'down' | 'neutral';
-  data: number[];
+  mainValue?: string;
+  compareValue?: string | any;
+  mainDate?: string | any;
+  compareDate?: string | any;
+  percentValue?: string | any;
+  type: string;
+  trend?: string | any;
+  tabNumber?: number;
 };
 
 function getDaysInMonth(month: number, year: number) {
@@ -45,13 +49,16 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
 
 export default function StatCard({
   title,
-  value,
-  interval,
+  mainValue,
+  compareValue,
+  mainDate,
+  compareDate,
   trend,
-  data,
-}: StatCardProps) {
+  percentValue,
+  type
+}: StatCardStruct) {
+
   const theme = useTheme();
-  const daysInWeek = getDaysInMonth(new Date().getMonth() + 1, new Date().getFullYear());
 
   const trendColors = {
     up:
@@ -93,36 +100,57 @@ export default function StatCard({
               direction="row"
               sx={{ justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <Typography variant="h4" component="p">
-                {value}
-              </Typography>
-              <Chip size="small" color={color} label={trendValues[trend]} />
+              {
+                type == 'compare' && (
+                  <Typography variant="h4" component="p">
+                    {mainValue}
+                  </Typography>
+                )
+              }
+              {
+                type == 'info' && (
+                  <Typography variant="h5" component="p">
+                    {mainValue}
+                  </Typography>
+                )
+              }
+              {
+                type == 'countInfo' && (
+                  <Typography style={Number(mainValue) < 1 ? { color: 'green' } : { color: 'red' }} variant="h5" component="p">
+                    {mainValue} ชิ้น
+                  </Typography>
+                )
+              }
+              {
+                type == 'compare' && (
+                  <Chip size="small" color={color} label={percentValue} />
+                )
+              }
             </Stack>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              {interval}
-            </Typography>
+            {
+              type == 'compare' && (
+                <Typography variant="caption">
+                  {mainDate}
+                </Typography>
+              )
+            }
           </Stack>
-          <Box sx={{ width: '100%', height: 50 }}>
-            <SparkLineChart
-              color={chartColor}
-              data={data}
-              area
-              showHighlight
-              showTooltip
-              xAxis={{
-                scaleType: 'band',
-                data: daysInWeek, // Use the correct property 'data' for xAxis
-              }}
-              sx={{
-                [`& .${areaElementClasses.root}`]: {
-                  fill: `url(#area-gradient-${value})`,
-                },
-              }}
-            >
-              <AreaGradient color={chartColor} id={`area-gradient-${value}`} />
-            </SparkLineChart>
-          </Box>
         </Stack>
+        {
+          type == 'compare' && (
+            <Stack direction="column" spacing={1} flexGrow={1}>
+              <Stack>
+                <Stack direction="row" color="text.secondary" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h4">{compareValue}</Typography>
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  {compareDate}
+                </Typography>
+              </Stack>
+            </Stack>
+
+          )
+        }
       </CardContent>
     </Card>
   );
