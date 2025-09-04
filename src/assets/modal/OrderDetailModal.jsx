@@ -146,7 +146,6 @@ export default function OrderDetailModal({ open, onClose, orderData, loading, se
                             <Typography fontWeight="medium" fontSize="1rem">ชื่อลูกค้า</Typography>
                             <Typography fontSize="1rem">{order.customerName}</Typography>
                         </Box>
-2
                         <Box display="flex" justifyContent="space-between" mb={1} mt={2}>
                             <Typography fontWeight="bold" fontSize="1rem">ช่องทางสั่งซื้อ</Typography>
                             <Typography fontSize="1rem">{order.orderChannel}</Typography>
