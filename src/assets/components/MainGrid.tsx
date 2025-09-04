@@ -334,9 +334,13 @@ export default function MainGrid() {
     try {
       const { data } = await axios.post("http://localhost:8000/api/v1/dashboard/lastAddStockDate");
       const latestAddStockDate = data.data;
+      let dataValue = latestAddStockDate.date;
+      if(latestAddStockDate === "P2025") {
+        dataValue = "ยังไม่มีการเติมสต็อก";
+      }
       const todayLatestAddStockDateItem: StatCardStruct = {
         title: 'วันที่เพิ่มสต็อกครั้งล่าสุด',
-        mainValue: `${latestAddStockDate.date}`,
+        mainValue: `${dataValue}`,
         type: 'info',
       };
       item.push(todayLatestAddStockDateItem);
