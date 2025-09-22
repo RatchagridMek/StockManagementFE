@@ -163,7 +163,6 @@ function Category() {
     const [toggleCreateCategoryModal, setToggleCreateCategoryModal] = useState(false)
     const [loading, setLoading] = useState(false)
     const [updateLoading, setUpdateLoading] = useState(false)
-    const [createProductSuccess, setCreateProductSuccess] = useState(false);
     const [confirmModalToggle, setConfirmModalToggle] = useState(false)
     const [confirmType, setConfirmType] = useState("")
     const [buttonActionLoading, setButtonActionLoading] = useState(false)
@@ -349,6 +348,13 @@ function Category() {
 
     function onAddCategory(form) {
         setLoading(true)
+        if(form.name == "") {
+            setLoading(false)
+            setNotificationPopup(true)
+            setNotificationType("error")
+            setNotificationMessage("กรุณากรอกชื่อหมวดหมู่ค่ะ")
+            return
+        }
         fetch("http://localhost:8000/api/v1/category/create", {
             method: "POST",
             headers: {
@@ -364,7 +370,9 @@ function Category() {
                 fetchCategory()
                 setLoading(false)
                 setToggleCreateCategoryModal(false)
-                setCreateProductSuccess(true)
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("เพิ่มหมวดหมู่สำเร็จค่ะ")
                 sortedList.map((sortItem) => { sortItem.selected = false })
             })
             .catch((error) => console.error("Fetch error:", error));

@@ -189,7 +189,7 @@ function Customers() {
         })
             .then((data) => {
                 setNotificationType('success')
-                setNotificationMessage('Update customer success')
+                setNotificationMessage('อัปเดตข้อมูลลูกค้าสำเร็จค่ะ')
                 setUpdateCustomerLoading(false)
                 setUpdateCustomerModalOpen(false)
                 setNotificationPopup(true)
@@ -198,7 +198,7 @@ function Customers() {
             .catch((error) => {
                 console.error("Fetch error:", error)
                 setNotificationType('error')
-                setNotificationMessage('Update customer failed')
+                setNotificationMessage('อัปเดตข้อมูลลูกค้าไม่สำเร็จค่ะ')
                 setUpdateCustomerLoading(false)
                 setUpdateCustomerModalOpen(false)
                 setNotificationPopup(true)
@@ -216,7 +216,7 @@ function Customers() {
             .then((data) => {
                 setNotificationPopup(true)
                 setNotificationType('success')
-                setNotificationMessage('Create customer success')
+                setNotificationMessage('เพิ่มข้อมูลลูกค้าสำเร็จค่ะ')
                 setCreateCustomerModalOpen(false)
                 setCreateCustomerLoading(false)
                 fetchCustomers()
@@ -230,7 +230,7 @@ function Customers() {
                         setNotificationMessage("ชื่อ-นามสกุลลูกค้ามีอยู่แล้วในระบบค่ะ")
                         break;
                     default:
-                        setNotificationMessage("Create customer failed with code : " + error.response.data.statusCd)
+                        setNotificationMessage("เพิ่มข้อมูลลูกค้าไม่สำเร็จค่ะ")
                 }
                 setCreateCustomerModalOpen(false)
                 setCreateCustomerLoading(false)

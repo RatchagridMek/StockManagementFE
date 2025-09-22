@@ -9,7 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 
 interface OrderData {
-  month: number;
+  month: string;
   orderCount: number;
 }
 
@@ -32,6 +32,7 @@ export default function OrderCountBarChart() {
           headers: { "Content-Type": "application/json" }
         });
         const myData = data.data as OrderData[];
+        console.log(myData)
         setData(myData);
         
         const max = myData.reduce((max, item) => Math.max(max, item.orderCount), 0);
@@ -46,7 +47,10 @@ export default function OrderCountBarChart() {
   }, []);
 
   const chartData = React.useMemo(() => data.map(item => item.orderCount), [data]);
-  const chartLabels = React.useMemo(() => data.map(item => monthNames[item.month - 1]), [data, monthNames]);
+  const chartLabels = React.useMemo(() => data.map(item => monthNames[Number(item.month) - 1]), [data, monthNames]);
+
+  console.log(chartData)
+  console.log(chartLabels)
 
   return (
     <Card variant="outlined" sx={{ width: '100%', borderRadius: 2, boxShadow: 3 }}>
@@ -76,9 +80,9 @@ export default function OrderCountBarChart() {
             ]}
             xAxis={[
               {
-                scaleType: 'band',
                 data: chartLabels,
-                tickLabelInterval: (index) => (index + 1) % 2 === 0,
+                scaleType: 'band',
+                // tickLabelInterval: (index) => (index + 1) % 2 === 0,
               },
             ]}
             yAxis={[{ width: 30 }]}
