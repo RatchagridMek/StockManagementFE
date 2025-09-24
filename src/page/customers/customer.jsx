@@ -1,6 +1,8 @@
 
 
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Grid } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, 
+    TableContainer, TableHead, TableRow, TablePagination, 
+    Grid, Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -16,6 +18,7 @@ import DeleteButton from '../../assets/components/DeleteButton';
 import RecoverButton from '../../assets/components/RecoverButton';
 import UpdateCustomerModal from '../../assets/modal/UpdateCustomerModal';
 import CreateCustomerModal from '../../assets/modal/CreateCustomerModal';
+import DeletedButton from '../../assets/components/DeletedButton';
 
 
 const initialList = [
@@ -138,6 +141,10 @@ function Customers() {
     const [updateCustomerModalOpen, setUpdateCustomerModalOpen] = useState(false);
     const [updateCustomerLoading, setUpdateCustomerLoading] = useState(false)
     const [search, setSearch] = useState("")
+    const [confirmActionId, setConfirmActionId] = useState("")
+    const [buttonActionLoading, setButtonActionLoading] = useState(false)
+    const [confirmModalToggle, setConfirmModalToggle] = useState(false)
+    const [confirmType, setConfirmType] = useState("")
     const [customerUpdateForm, setCustomerUpdateForm] = useState({
         customerId: '',
         customerName: '',
@@ -154,6 +161,65 @@ function Customers() {
             customerPhone: form.customerPhone,
         })
         setUpdateCustomerModalOpen(true)
+    }
+
+    async function handleDeleteCustomer() {
+        setButtonActionLoading(true)
+        axios.post("http://localhost:8000/api/v1/customer/delete", {
+            customerId: confirmActionId
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }).then((res) => {
+            fetchCustomers()
+            setButtonActionLoading(false)
+            setNotificationPopup(true)
+            setNotificationType("success")
+            setNotificationMessage("ลบลูกค้าสำเร็จค่ะ")
+            setConfirmModalToggle(false)
+        }).catch((error) => {
+            console.error("Fetch error:", error)
+            setButtonActionLoading(false)
+            setNotificationPopup(true)
+            setNotificationType("error")
+            setNotificationMessage("ลบลูกค้าไม่สำเร็จค่ะ")
+            setConfirmModalToggle(false)
+        })
+
+    }
+
+    async function handleRecoverCustomer() {
+        setButtonActionLoading(true)
+        axios.post("http://localhost:8000/api/v1/customer/recover", {
+            customerId: confirmActionId
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }).then((res) => {
+            fetchCustomers()
+            setButtonActionLoading(false)
+            setNotificationPopup(true)
+            setNotificationType("success")
+            setNotificationMessage("กู้คืนลูกค้าสำเร็จค่ะ")
+            setConfirmModalToggle(false)
+        }).catch((error) => {
+            console.error("Fetch error:", error)
+            setButtonActionLoading(false)
+            setNotificationPopup(true)
+            setNotificationType("error")
+            setNotificationMessage("กู้คืนลูกค้าไม่สำเร็จค่ะ")
+            setConfirmModalToggle(false)
+        })
+    }
+   
+
+    function handleConfirmActionCategory(row, type) {
+        console.log(row.customerId)
+        setConfirmType(type)
+        setConfirmModalToggle(true)
+        setConfirmActionId(row.customerId)
     }
 
     async function fetchCustomers() {
@@ -345,7 +411,7 @@ function Customers() {
                                                                 <ActiveButton>Active</ActiveButton>
                                                             </TableCell>
                                                         );
-                                                    case 'Deleted':
+                                                    case 'Delete':
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
                                                                 <DeletedButton>Deleted</DeletedButton>
@@ -361,17 +427,17 @@ function Customers() {
                                                             </TableCell>
                                                         );
                                                     case 'deleteAction': {
-                                                        switch (row.categoryStatus) {
-                                                            case 'Deleted':
+                                                        switch (row.customerStatus) {
+                                                            case 'Delete':
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <RecoverButton onClick={() => handleConfirmActionCategory(row, "recover")}>กู้คืน</RecoverButton>
+                                                                        <RecoverButton onClick={() => handleConfirmActionCategory(row, "recover")}>เปิดการใช้งานลูกค้า</RecoverButton>
                                                                     </TableCell>
                                                                 );
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton onClick={() => handleConfirmActionCategory(row, "delete")}>ลบ</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleConfirmActionCategory(row, "delete")}>ปิดการใช้งานลูกค้า</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
@@ -400,6 +466,33 @@ function Customers() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+            <Dialog open={confirmModalToggle} onClose={(current) => setConfirmModalToggle(!current)}>
+                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะปิดใช้งานลูกค้าท่านนี้ใช่หรือไม่ ?" : "คุณต้องการที่จะเปิดใช้งานลูกค้าท่านนี้ใช่หรือไม่ ?"}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => setConfirmModalToggle(!confirmModalToggle)} color="error" variant="contained">
+                        ยกเลิก
+                    </Button>
+                    <Button onClick={() => {
+                        switch (confirmType) {
+                            case 'delete': {
+                                handleDeleteCustomer();
+                                break;
+                            }
+                            case 'recover': {
+                                handleRecoverCustomer();
+                                break;
+                            }
+                        }
+                    }} 
+                    color="success" 
+                    variant="contained"
+                    loading={buttonActionLoading}
+                    loadingPosition="end"
+                    >
+                        ยืนยัน
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <CreateCustomerModal open={createCustomerModalOpen} onClose={() => setCreateCustomerModalOpen(false)} onSubmit={handleCreateCustomer} loading={createCustomerLoading} />
             <UpdateCustomerModal open={updateCustomerModalOpen} onClose={() => setUpdateCustomerModalOpen(false)} onSubmit={handleUpdateCustomer} loading={updateCustomerLoading} updateForm={customerUpdateForm} />
         </div>

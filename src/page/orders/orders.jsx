@@ -145,7 +145,7 @@ function Orders() {
                 });
         }
         async function fetchCustomer() {
-            fetch("http://localhost:8000/api/v1/customer/")
+            fetch("http://localhost:8000/api/v1/customer/available/")
                 .then((res) => {
                     if (!res.ok) throw new Error("Network response was not ok");
                     return res.json();

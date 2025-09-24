@@ -758,13 +758,13 @@ function Product() {
                                                             case 'Deleted':
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <RecoverButton onClick={() => handleConfirmActionProduct(row, 'recover')}>กู้คืน</RecoverButton>
+                                                                        <RecoverButton onClick={() => handleConfirmActionProduct(row, 'recover')}>เปิดการใช้งานลูกค้า</RecoverButton>
                                                                     </TableCell>
                                                                 );
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton onClick={() => handleConfirmActionProduct(row, 'delete')}>ลบ</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleConfirmActionProduct(row, 'delete')}>ปิดการใช้งานลูกค้า</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
@@ -794,7 +794,7 @@ function Product() {
                 />
             </Paper>
             <Dialog open={confirmModalToggle} onClose={(current) => setConfirmModalToggle(!current)}>
-                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะลบสินค้าใช่หรือไม่ ?" : "คุณต้องการที่จะกู้คืนสินค้าใช่หรือไม่ ?"}</DialogTitle>
+                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะปิดการใช้งานสินค้าใช่หรือไม่ ?" : "คุณต้องการที่จะเปิดการใช้งานสินค้าใช่หรือไม่ ?"}</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setConfirmModalToggle(!confirmModalToggle)} color="error" variant="contained">
                         ยกเลิก

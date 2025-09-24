@@ -529,13 +529,13 @@ function Category() {
                                                             case 'Deleted':
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <RecoverButton onClick={() => handleConfirmActionCategory(row, "recover")}>กู้คืน</RecoverButton>
+                                                                        <RecoverButton onClick={() => handleConfirmActionCategory(row, "recover")}>เปิดการใช้งานหมวดหมู่</RecoverButton>
                                                                     </TableCell>
                                                                 );
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton onClick={() => handleConfirmActionCategory(row, "delete")}>ลบ</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleConfirmActionCategory(row, "delete")}>ปิดการใช้งานหมวดหมู่</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
@@ -565,7 +565,7 @@ function Category() {
                 />
             </Paper>
             <Dialog open={confirmModalToggle} onClose={(current) => setConfirmModalToggle(!current)}>
-                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะลบหมวดหมู่ใช่หรือไม่ ?" : "คุณต้องการที่จะกู้คืนหมวดหมู่ใช่หรือไม่ ?"}</DialogTitle>
+                <DialogTitle fontWeight="bold">{confirmType === "delete" ? "คุณต้องการที่จะปิดการใช้งานหมวดหมู่ใช่หรือไม่ ?" : "คุณต้องการที่จะเปิดการใช้งานหมวดหมู่ใช่หรือไม่ ?"}</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setConfirmModalToggle(!confirmModalToggle)} color="error" variant="contained">
                         ยกเลิก
