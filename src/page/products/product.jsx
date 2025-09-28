@@ -758,13 +758,13 @@ function Product() {
                                                             case 'Deleted':
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <RecoverButton onClick={() => handleConfirmActionProduct(row, 'recover')}>เปิดการใช้งานลูกค้า</RecoverButton>
+                                                                        <RecoverButton onClick={() => handleConfirmActionProduct(row, 'recover')}>เปิดการใช้งานสินค้า</RecoverButton>
                                                                     </TableCell>
                                                                 );
                                                             default:
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <DeleteButton onClick={() => handleConfirmActionProduct(row, 'delete')}>ปิดการใช้งานลูกค้า</DeleteButton>
+                                                                        <DeleteButton onClick={() => handleConfirmActionProduct(row, 'delete')}>ปิดการใช้งานสินค้า</DeleteButton>
                                                                     </TableCell>
                                                                 );
                                                         }
