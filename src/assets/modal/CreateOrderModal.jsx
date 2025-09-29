@@ -23,6 +23,7 @@ import {
 import { Delete, Close } from "@mui/icons-material";
 import { useState } from "react";
 import CustomerListModal from "./CustomerListModal";
+import { v4 as uuidv4 } from 'uuid';
 
 const StyledButton = styled(Button)(() => ({
     backgroundColor: "#3a3c41",
@@ -102,22 +103,32 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
         return matchesCategory && matchesSearch;
     });
 
+    const checkProduct = (productId) => {
+        let count = 0
+        selectedProducts.map((p) => {
+            if (p.id === productId) {
+                count++
+            }
+        })
+        return count >= 2
+    }
+
     const handleSelectProduct = (product) => {
-        if (!selectedProducts.find((p) => p.id === product.id)) {
-            setSelectedProducts([...selectedProducts, { ...product, quantity: 1, isGiveaway: false }]);
-        }
+        let uuid = uuidv4();
+        let productBuild = { ...product, quantity: 1, isGiveaway: false, itemId: uuid }
+        setSelectedProducts([...selectedProducts, productBuild]);
     };
 
     const handleQuantityChange = (id, value) => {
         setSelectedProducts((prev) =>
             prev.map((p) =>
-                p.id === id ? { ...p, quantity: parseInt(value) || 0 } : p
+                p.itemId === id ? { ...p, quantity: parseInt(value) || 0 } : p
             )
         );
     };
 
     const handleRemoveProduct = (id) => {
-        setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
+        setSelectedProducts((prev) => prev.filter((p) => p.itemId !== id));
     };
 
     const total = selectedProducts.reduce(
@@ -245,7 +256,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                     <Button
                                         variant="contained"
                                         onClick={() => handleSelectProduct(product)}
-                                        disabled={selectedProducts.some((p) => p.id === product.id) || product.amount < 1}
+                                        disabled={checkProduct(product.id) || product.amount < 1}
                                         sx={{
                                             backgroundColor: "#3A3C41",
                                             color: "#FFFFFF",
@@ -278,7 +289,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                     </TableHead>
                     <TableBody>
                         {selectedProducts.map((item) => (
-                            <TableRow key={item.id}>
+                            <TableRow key={item.itemId}>
                                 <TableCell>{item.name}</TableCell>
                                 <TableCell>
                                     <TextField
@@ -289,21 +300,21 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                             const rawValue = e.target.value;
 
                                             if (rawValue === "") {
-                                                handleQuantityChange(item.id, "");
+                                                handleQuantityChange(item.itemId, "");
                                                 return;
                                             }
 
                                             const parsed = parseInt(rawValue, 10);
                                             if (!isNaN(parsed)) {
-                                                handleQuantityChange(item.id, parsed);
+                                                handleQuantityChange(item.itemId, parsed);
                                             }
                                         }}
                                         onBlur={(e) => {
                                             const value = parseInt(e.target.value, 10);
                                             if (isNaN(value) || value < 1) {
-                                                handleQuantityChange(item.id, 1);
+                                                handleQuantityChange(item.itemId, 1);
                                             } else if (value > item.amount) {
-                                                handleQuantityChange(item.id, item.amount);
+                                                handleQuantityChange(item.itemId, item.amount);
                                             }
                                         }}
                                     />
@@ -318,7 +329,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                                 onChange={(e) => {
                                                     setSelectedProducts((prev) =>
                                                         prev.map((p) =>
-                                                            p.id === item.id ? { ...p, isGiveaway: e.target.checked } : p
+                                                            p.itemId === item.itemId ? { ...p, isGiveaway: e.target.checked } : p
                                                         )
                                                     );
                                                 }}
@@ -328,7 +339,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                                     />
                                 </TableCell>
                                 <TableCell align="right">
-                                    <IconButton onClick={() => handleRemoveProduct(item.id)}>
+                                    <IconButton onClick={() => handleRemoveProduct(item.itemId)}>
                                         <Delete />
                                     </IconButton>
                                 </TableCell>
