@@ -5,6 +5,7 @@ import ProductionQuantityLimitsOutlinedIcon from '@mui/icons-material/Production
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
 import { Link, useLocation } from "react-router-dom";
 import Divider from '@mui/material/Divider';
 import { Box } from "@mui/material";
@@ -67,6 +68,15 @@ function AppSidebar({ isCollapsed }) {
                     badge={false}
                     isSelected={currentPath === "/customers"}>
                     Customer
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                    icon={<DeliveryDiningIcon />}
+                    component={Link}
+                    link="/delivery"
+                    badge={false}
+                    isSelected={currentPath === "/delivery"}>
+                    Delivery
                 </MenuItem>
                 <Divider />
             </Box>

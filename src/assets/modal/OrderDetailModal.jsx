@@ -196,70 +196,13 @@ export default function OrderDetailModal({ open, onClose, orderData, loading, se
                         </TableContainer>
 
                         <Box display="flex" justifyContent="space-between" mb={1}>
-                            <Typography fontWeight="medium" fontSize="1rem">ราคาสินค้ารวม</Typography>
-                            <Typography fontWeight="medium" fontSize="1rem">{order.totalPrice} บาท</Typography>
-                        </Box>
-
-                        <Box display="flex" justifyContent="space-between" mb={1}>
-                            <Typography fontWeight="medium" fontSize="1rem">ราคาค่าจัดส่ง</Typography>
-                            <Box>
-                                {
-                                    (order.deliveryFee === "Free" && shippingMode !== "input") && (
-                                        <Box display="flex" alignItems="center" gap={1}>
-                                            <Typography fontSize="1rem">ไม่มีค่าจัดส่ง</Typography>
-                                            <Button
-                                                size="small"
-                                                variant="outlined"
-                                                color="primary"
-                                                startIcon={<EditIcon />}
-                                                onClick={() => setShippingMode("input")}>
-                                                แก้ไข
-                                            </Button>
-                                        </Box>
-                                    )
-                                }
-                                {(parsedShipping === 0 && shippingMode !== "input" && order.deliveryFee !== "Free") && (
-                                    <Typography fontSize="1rem">ยังไม่ได้เพิ่มค่าจัดส่ง</Typography>
-
-                                )}
-                                {shippingMode === "input" && (
-                                    <TextField
-                                        size="small"
-                                        placeholder="ราคาค่าจัดส่ง"
-                                        value={parsedShipping}
-                                        onChange={(e) => setOrder({ ...order, deliveryFee: e.target.value })}
-                                        sx={{ width: 100 }}
-                                    />
-                                )}
-                                {(parsedShipping > 0 && shippingMode !== "input") && (
-                                    <Box display="flex" alignItems="center" gap={1}>
-                                        <Typography fontSize="1rem">{parsedShipping} บาท</Typography>
-                                        <Button
-                                            size="small"
-                                            variant="outlined"
-                                            color="primary"
-                                            startIcon={<EditIcon />}
-                                            onClick={() => setShippingMode("input")}>
-                                            แก้ไข
-                                        </Button>
-                                    </Box>
-                                )}
-                            </Box>
-                        </Box>
-
-                        <Box display="flex" justifyContent="space-between" mb={1}>
                             <Typography fontWeight="bold" fontSize="1.1rem">ราคารวม</Typography>
                             <Typography fontWeight="bold" fontSize="1.1rem">
-                                {Number(order.totalPrice) + parsedShipping} บาท
+                                {Number(order.totalPrice)} บาท
                             </Typography>
                         </Box>
 
                         <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
-                            {(parsedShipping === 0 && shippingMode === "none") && (
-                                <Button variant="contained" color="warning" onClick={handleAddShippingClick}>
-                                    เพิ่มราคาค่าจัดส่ง
-                                </Button>
-                            )}
                             {shippingMode === "input" && (
                                 <Button variant="contained" color="success" onClick={handleConfirmShipping}>
                                     ยืนยัน
