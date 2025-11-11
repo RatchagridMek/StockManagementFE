@@ -217,7 +217,6 @@ function Delivery() {
         deliveryCompany: "",
         deliveryDate: "",
         deliveryStatus: "",
-        deliveryAddress: "",
         createdDate: "",
         updatedDate: "",
     }

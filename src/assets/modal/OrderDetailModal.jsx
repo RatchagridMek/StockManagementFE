@@ -1,223 +1,287 @@
 import React, { useEffect, useState } from "react";
 import {
-    Box,
-    Typography,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    TextField,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
-    Paper,
-    CircularProgress,
-    Fade,
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+  Divider,
+  CircularProgress,
+  Fade,
+  Card,
+  CardContent,
+  useMediaQuery,
 } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-import axios from "axios";
+import { CheckCircle } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 
+export default function OrderDetailModal({
+  open,
+  onClose,
+  orderData,
+  loading,
+}) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-export default function OrderDetailModal({ open, onClose, orderData, loading, setLoading, setNotificationPopup, setNotificationType, setNotificationMessage, customerProfile }) {
+  const [order, setOrder] = useState({
+    id: "",
+    customerName: "",
+    customerAddress: "",
+    createdDate: "",
+    totalPrice: "",
+    deliveryFee: "",
+    orderChannel: "",
+    productList: [],
+    giveawayList: [],
+  });
 
-    useEffect(() => {
-        if (orderData) {
-            setOrder(orderData)
-            if (Number(orderData.deliveryFee) > 0) setShippingMode("done")
-            else if (orderData.deliveryFee === "Free") setShippingMode("done")
-            else if (Number(orderData.deliveryFee) === 0) setShippingMode("none")
-            else setShippingMode("input")
-        }
-    }, [orderData]);
-
-    const [shippingMode, setShippingMode] = useState(""); // none | input | done
-    const [order, setOrder] = useState({
-        id: '',
-        customerName: '',
-        createdDate: '',
-        totalPrice: '',
-        deliveryFee: '',
-        orderChannel: '',
-        productList: [{
-            productId: '',
-            productName: '',
-            productAmount: '',
-            totalProductPrice: ''
-        }],
-        giveawayList: [{
-            productId: '',
-            productName: '',
-            productAmount: '',
-            totalProductPrice: ''
-        }]
-    });
-
-    const style = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 500,
-        bgcolor: 'background.paper',
-        color: 'text.primary',
-        boxShadow: 24,
-        borderRadius: 2,
-        p: 3
+  useEffect(() => {
+    if (orderData) {
+      setOrder(orderData);
     }
+  }, [orderData]);
 
-    const parsedShipping = Number(order.deliveryFee) || 0;
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: "hidden",
+        },
+      }}
+    >
+      {loading ? (
+        <Fade in={loading}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            height="300px"
+          >
+            <CircularProgress size={40} />
+            <Typography mt={2} fontSize="1rem" color="textSecondary">
+              กำลังโหลดข้อมูลออเดอร์...
+            </Typography>
+          </Box>
+        </Fade>
+      ) : (
+        <Box sx={{ bgcolor: "background.default" }}>
+          <DialogTitle
+            sx={{
+              textAlign: "center",
+              fontWeight: 700,
+              fontSize: isMobile ? "1.2rem" : "1.5rem",
+              color: "primary.main",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              pb: 2,
+            }}
+          >
+            หมายเลขออเดอร์
+            <Typography
+              component="div"
+              sx={{
+                fontSize: isMobile ? "1rem" : "1.2rem",
+                color: "text.primary",
+                mt: 0.5,
+                wordBreak: "break-all",
+                fontWeight: 600,
+              }}
+            >
+              {order.id}
+            </Typography>
+          </DialogTitle>
 
-    const handleAddShippingClick = () => setShippingMode("input");
+          <DialogContent sx={{ p: isMobile ? 2 : 3 }}>
+            {/* Customer Info */}
+            <Card
+              variant="outlined"
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: 1,
+                bgcolor: "background.paper",
+              }}
+            >
+              <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  gutterBottom
+                >
+                  ข้อมูลลูกค้า
+                </Typography>
+                <Typography fontWeight="bold" variant="body1">
+                  {order.customerName}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ whiteSpace: "pre-line", mt: 0.5, lineHeight: 1.6 }}
+                >
+                  {order.customerAddress}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  ช่องทางสั่งซื้อ: <b>{order.orderChannel}</b>
+                </Typography>
+              </CardContent>
+            </Card>
 
-    async function fetchOrderById(orderId) {
-        axios.post("http://localhost:8000/api/v1/order/get", {
-            orderId: orderId
-        }, {
-            headers: {
-                "Content-Type": "application/json",
-            }
-        })
-            .then((data) => {
-                let response = data.data.data
-                setOrder(response)
-            })
-            .catch((error) => {
-                console.error("Fetch error:", error)
-            });
-    }
+            {/* Product List */}
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ fontSize: isMobile ? "1rem" : "1.1rem" }}
+            >
+              รายการสินค้า
+            </Typography>
+            <Paper
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                mb: 3,
+                overflow: "hidden",
+              }}
+            >
+              <Table size="small">
+                <TableBody>
+                  {order.productList.map((product) => (
+                    <TableRow key={product.productId}>
+                      <TableCell
+                        sx={{
+                          borderBottom: "1px solid",
+                          borderColor: "divider",
+                          py: 1,
+                          fontSize: isMobile ? "0.9rem" : "1rem",
+                        }}
+                      >
+                        {product.productName} x {product.productAmount}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          borderBottom: "1px solid",
+                          borderColor: "divider",
+                          py: 1,
+                          fontWeight: 500,
+                          fontSize: isMobile ? "0.9rem" : "1rem",
+                        }}
+                      >
+                        {product.totalProductPrice} บาท
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Paper>
 
-    const handleConfirmShipping = () => {
-        setLoading(true)
-        if (!isNaN(parsedShipping)) {
-            setShippingMode("done");
-            axios.post("http://localhost:8000/api/v1/order/updateRideFee", {
-                orderId: orderData.id,
-                rideFee: parsedShipping == 0 ? "Free" : String(parsedShipping)
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
-                .then((data) => {
-                    onClose()
-                    setNotificationPopup(true)
-                    setNotificationType("success")
-                    setNotificationMessage("อัปเดตค่าจัดส่งสำเร็จค่ะ")
-                    fetchOrderById(orderData.id)
-                    setLoading(false)
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error)
-                    setNotificationPopup(true)
-                    setNotificationType("error")
-                    setNotificationMessage("อัปเดตค่าจัดส่งไม่สำเร็จค่ะ")
-                    setLoading(false)
-                });
-        }
-    };
-
-    return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            {loading ? (
-                <Fade in={loading}>
-                    <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        height="300px"
-                    >
-                        <CircularProgress size={40} />
-                        <Typography mt={2} fontSize="1rem" color="textSecondary">
-                            กำลังโหลดข้อมูลออเดอร์...
-                        </Typography>
-                    </Box>
-                </Fade>
-            ) : (
-                <Box>
-                    <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-                        {/* รายละเอียด {order.id.slice(order.id.length - 5) + order.createdDate.replaceAll("/", "")} */}
-                        หมายเลขออเดอร์ {order.id}
-                    </DialogTitle>
-                    <DialogContent sx={{ fontSize: '1rem' }}>
-                        <Box display="flex" justifyContent="space-between" mb={1}>
-                            <Typography fontWeight="medium" fontSize="1rem">ชื่อลูกค้า</Typography>
-                            <Typography fontSize="1rem">{order.customerName}</Typography>
-                        </Box>
-                        <Box display="flex" justifyContent="space-between" mb={1} mt={2}>
-                            <Typography fontWeight="bold" fontSize="1rem">ช่องทางสั่งซื้อ</Typography>
-                            <Typography fontSize="1rem">{order.orderChannel}</Typography>
-                        </Box>
-
-                        <Box display="flex" justifyContent="space-between" mb={1} mt={2}>
-                            <Typography fontWeight="bold" fontSize="1rem">รายการสินค้า</Typography>
-                            <Typography fontWeight="bold" fontSize="1rem">ราคา (บาท)</Typography>
-                        </Box>
-
-                        <TableContainer component="div" sx={{ my: 1 }}>
-                            <Table size="small">
-                                <TableBody>
-                                    {order.productList.map((product) => (
-                                        <TableRow key={product.productId}>
-                                            <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
-                                                {product.productName} x {product.productAmount}
-                                            </TableCell>
-                                            <TableCell align="right" sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
-                                                {product.totalProductPrice} บาท
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-
-                        <Box display="flex" justifyContent="space-between" mb={1} mt={2}>
-                            <Typography fontWeight="bold" fontSize="1rem">รายการของแถม</Typography>
-                            <Typography fontWeight="bold" fontSize="1rem">ราคา (บาท)</Typography>
-                        </Box>
-
-                        <TableContainer component="div" sx={{ my: 1 }}>
-                            <Table size="small">
-                                <TableBody>
-                                    {order.giveawayList.map((giveaway) => (
-                                        <TableRow key={giveaway.productId}>
-                                            <TableCell sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
-                                                {giveaway.productName} x {giveaway.productAmount}
-                                            </TableCell>
-                                            <TableCell align="right" sx={{ borderBottom: 'none', py: 0.5, fontSize: '1rem' }}>
-                                                {giveaway.totalProductPrice} บาท
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-
-                        <Box display="flex" justifyContent="space-between" mb={1}>
-                            <Typography fontWeight="bold" fontSize="1.1rem">ราคารวม</Typography>
-                            <Typography fontWeight="bold" fontSize="1.1rem">
-                                {Number(order.totalPrice)} บาท
-                            </Typography>
-                        </Box>
-
-                        <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
-                            {shippingMode === "input" && (
-                                <Button variant="contained" color="success" onClick={handleConfirmShipping}>
-                                    ยืนยัน
-                                </Button>
-                            )}
-                            {(shippingMode === "done" || shippingMode === "none") && (
-                                <Button onClick={onClose} variant="contained" color="success">
-                                    เสร็จสิ้น
-                                </Button>
-                            )}
-                        </Box>
-                    </DialogContent>
-                </Box>
+            {/* Giveaway List */}
+            {order.giveawayList.length > 0 && (
+              <>
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  gutterBottom
+                  sx={{ fontSize: isMobile ? "1rem" : "1.1rem" }}
+                >
+                  รายการของแถม
+                </Typography>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    mb: 3,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Table size="small">
+                    <TableBody>
+                      {order.giveawayList.map((giveaway) => (
+                        <TableRow key={giveaway.productId}>
+                          <TableCell
+                            sx={{
+                              borderBottom: "1px solid",
+                              borderColor: "divider",
+                              py: 1,
+                              fontSize: isMobile ? "0.9rem" : "1rem",
+                            }}
+                          >
+                            {giveaway.productName} x {giveaway.productAmount}
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{
+                              borderBottom: "1px solid",
+                              borderColor: "divider",
+                              py: 1,
+                              fontSize: isMobile ? "0.9rem" : "1rem",
+                            }}
+                          >
+                            {giveaway.totalProductPrice} บาท
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Paper>
+              </>
             )}
-        </Dialog>
 
-    );
-};
+            <Divider sx={{ my: 2 }} />
+
+            {/* Total */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                ราคารวมทั้งหมด
+              </Typography>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                color="success.main"
+                sx={{ fontSize: isMobile ? "1rem" : "1.2rem" }}
+              >
+                {Number(order.totalPrice)} บาท
+              </Typography>
+            </Box>
+
+            <Box display="flex" justifyContent="center" mt={3}>
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<CheckCircle />}
+                onClick={onClose}
+                sx={{
+                  px: isMobile ? 3 : 5,
+                  py: 1,
+                  borderRadius: 3,
+                  fontSize: isMobile ? "0.9rem" : "1rem",
+                  textTransform: "none",
+                }}
+              >
+                เสร็จสิ้น
+              </Button>
+            </Box>
+          </DialogContent>
+        </Box>
+      )}
+    </Dialog>
+  );
+}

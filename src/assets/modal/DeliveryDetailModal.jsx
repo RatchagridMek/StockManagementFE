@@ -165,23 +165,6 @@ const DeliveryDetailModal = ({ open, handleClose, data, setError }) => {
                                 <Typography variant="body2">{data.deliveryDate}</Typography>
                             </Grid>
                         </Grid>
-                        <Grid container spacing={1.5}>
-                            <Grid item xs={12}>
-                                <Typography variant="body2" color="text.secondary">
-                                    ที่อยู่จัดส่ง
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                        <Grid container spacing={1.5}>
-                            <Grid item xs={12}>
-                                <Typography
-                                    variant="body2"
-                                    sx={{ wordBreak: "break-word", whiteSpace: "pre-line" }}
-                                >
-                                    {data.deliveryAddress}
-                                </Typography>
-                            </Grid>
-                        </Grid>
 
                     </Box>
 

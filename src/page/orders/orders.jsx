@@ -14,6 +14,8 @@ import CategoryIcon from '@mui/icons-material/Category';
 import CreateOrderModal from '../../assets/modal/CreateOrderModal';
 import OrderDetailModal from '../../assets/modal/OrderDetailModal';
 import axios from 'axios';
+import DeleteButton from '../../assets/components/DeleteButton';
+import ConfirmDialog from '../../assets/components/ConfirmDialog';
 
 const initialList = [
     {
@@ -103,6 +105,12 @@ const columns = [
         minWidth: 100,
         align: 'left',
     },
+    {
+        id: 'deleteAction',
+        label: '',
+        minWidth: 100,
+        align: 'left',
+    }
 ];
 
 
@@ -177,7 +185,7 @@ function Orders() {
                     const dataList = data.data.data
                     allList.push({ "id": "ทั้งหมด", "name": "ทั้งหมด" })
                     dataList.map((item) => {
-                        if(!item.is_deleted) {
+                        if (!item.is_deleted) {
                             allList.push(item)
                         }
                     })
@@ -201,10 +209,14 @@ function Orders() {
     const [productList, setProductList] = useState([])
     const [categoryList, setCategoryList] = useState([])
     const [customerList, setCustomerList] = useState([])
+    const [confirmModalToggle, setConfirmModalToggle] = useState(false)
+    const [confirmModalLoading, setConfirmModalLoading] = useState(false)
+    const [selectedOrderId, setSelectedOrderId] = useState('')
     const [toggleOrderDetailModal, setToggleOrderDetailModel] = useState(false)
     const [orderDetail, setOrderDetail] = useState({
         id: '',
         customerName: '',
+        customerAddress: '',
         createdDate: '',
         totalPrice: '',
         deliveryFee: '',
@@ -265,6 +277,52 @@ function Orders() {
             });
     }
 
+    async function fetchCustomer() {
+        fetch("http://localhost:8000/api/v1/customer/available/")
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data) => {
+                setCustomerList(data.data)
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error)
+            });
+    }
+
+    async function handleDelete(orderId) {
+        setSelectedOrderId(orderId)
+        setConfirmModalToggle(true)
+    }
+
+    async function handleConfirmDelete(orderId) {
+        console.log(orderId)
+        setConfirmModalLoading(true)
+        await axios.post("http://localhost:8000/api/v1/order/delete", {
+            orderId: orderId
+        }, {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+            .then((data) => {
+                setConfirmModalLoading(false)
+                setConfirmModalToggle(false)
+                fetchOrder()
+                setNotificationPopup(true)
+                setNotificationType("success")
+                setNotificationMessage("ลบออเดอร์สำเร็จค่ะ")
+            })
+            .catch((error) => {
+                setConfirmModalLoading(false)
+                setConfirmModalToggle(false)
+                setNotificationPopup(true)
+                setNotificationType("error")
+                setNotificationMessage("ลบออเดอร์ไม่สำเร็จค่ะ")
+            });
+    }
+
     function fetchProduct() {
         axios.get("http://localhost:8000/api/v1/product/getAll")
             .then((data) => {
@@ -281,7 +339,7 @@ function Orders() {
         setLoading(true)
     }
 
-    function handleSubmitCreateOrder(customerName, customerPhone, isSaveCustomer, selectedProducts, selectedOrderChannel) {
+    function handleSubmitCreateOrder(customerName, customerPhone, customerAddress, isSaveCustomer, selectedProducts, selectedOrderChannel) {
         setLoading(true)
         let productList = []
         selectedProducts.map((item) => {
@@ -295,6 +353,7 @@ function Orders() {
         axios.post("http://localhost:8000/api/v1/order/create", {
             customerName: customerName,
             customerPhoneNo: customerPhone,
+            customerAddress: customerAddress,
             isRememberCustomer: isSaveCustomer,
             productList: productList,
             orderChannel: selectedOrderChannel
@@ -309,6 +368,7 @@ function Orders() {
                 setNotificationPopup(true)
                 setNotificationType("success")
                 setNotificationMessage("สร้างคำสั่งซื้อสำเร็จค่ะ")
+                fetchCustomer()
                 fetchOrder()
                 fetchProduct()
             })
@@ -485,6 +545,12 @@ function Orders() {
                                                                 <EditButton onClick={() => buildUpdateData(row)}>ดูรายละเอียดเพิ่มเติม</EditButton>
                                                             </TableCell>
                                                         );
+                                                    case 'deleteAction':
+                                                        return (
+                                                            <TableCell key={column.id} align={column.align}>
+                                                                <DeleteButton onClick={() => handleDelete(row.orderId)}>ลบออเดอร์</DeleteButton>
+                                                            </TableCell>
+                                                        );
                                                     default:
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
@@ -510,6 +576,7 @@ function Orders() {
                 />
                 <CreateOrderModal onSubmit={handleSubmitCreateOrder} productList={productList} categoryList={categoryList} open={createOrderModalOpen} onClose={(current) => setCreateOrderModalOpen(!current)} customerList={customerList} loading={loading} setLoading={setLoading} />
                 <OrderDetailModal open={toggleOrderDetailModal} orderData={orderDetail} onClose={(current) => setToggleOrderDetailModel(!current)} loading={loading} setLoading={setLoading} setNotificationPopup={setNotificationPopup} setNotificationType={setNotificationType} setNotificationMessage={setNotificationMessage} />
+                <ConfirmDialog confirmModalToggle={confirmModalToggle} setConfirmModalToggle={setConfirmModalToggle} orderId={selectedOrderId} confirmText={"ท่านต้องการลบ " + selectedOrderId + " ใช่หรือไม่ ?"} onSubmit={handleConfirmDelete} buttonActionLoading={confirmModalLoading} />
             </Paper>
         </div>
     )

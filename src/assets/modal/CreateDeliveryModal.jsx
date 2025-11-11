@@ -27,7 +27,6 @@ export default function CreateDeliveryModal({ open, onClose, onSubmit, loading, 
 
   const defaultForm = {
     orderId: '',
-    deliveryAddress: '',
     deliveryDate: '',
     deliveryFee: '',
     deliveryType: '',
@@ -71,19 +70,6 @@ export default function CreateDeliveryModal({ open, onClose, onSubmit, loading, 
               value={form.orderId}
               onChange={handleChange}
               variant="outlined"
-            />
-          </Grid>
-
-          <Grid item size={12}>
-            <TextField
-              fullWidth
-              name="deliveryAddress"
-              label="รายละเอียดที่อยู่การจัดส่ง"
-              value={form.deliveryAddress}
-              onChange={handleChange}
-              variant="outlined"
-              multiline
-              maxRows={6}
             />
           </Grid>
 

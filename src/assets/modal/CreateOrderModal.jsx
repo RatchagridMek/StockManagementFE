@@ -50,6 +50,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
     const [confirmProducts, setConfirmProducts] = useState([]);
     const [customerName, setCustomerName] = useState("");
     const [customerPhone, setCustomerPhone] = useState("");
+    const [customerAddress, setCustomerAddress] = useState("");
     const [saveCustomer, setSaveCustomer] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [isCustomerImported, setIsCustomerImported] = useState(false);
@@ -65,7 +66,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
 
     const handleConfirmSubmit = () => {
         setConfirmOpen(false);
-        onSubmit(customerName, customerPhone, saveCustomer, selectedProducts, selectedOrderChannel)
+        onSubmit(customerName, customerPhone, customerAddress, saveCustomer, selectedProducts, selectedOrderChannel)
         handleClearModal()
     };
 
@@ -81,9 +82,11 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
     const handleClearForm = () => {
         setCustomerName("");
         setCustomerPhone("");
+        setCustomerAddress("");
+        setSaveCustomer(false);
         setIsCustomerImported(false);
     }
-    
+
     const handleCancleConfirm = () => {
         setConfirmOpen(false);
         setLoading(false)
@@ -210,6 +213,20 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                         </MenuItem>
                     ))}
                 </Select>
+
+                <Grid item size={12}>
+                    <TextField
+                        fullWidth
+                        name="deliveryAddress"
+                        label="รายละเอียดที่อยู่การจัดส่ง"
+                        value={customerAddress}
+                        onChange={(e) => setCustomerAddress(e.target.value)}
+                        variant="outlined"
+                        multiline
+                        maxRows={6}
+                        sx={{ mb: 1 }}
+                    />
+                </Grid>
 
                 <Typography fontWeight="bold" sx={{ mb: 1 }}>
                     เพิ่มรายการสินค้า
@@ -363,6 +380,7 @@ export default function CreateOrderModal({ open, onClose, customerList, productL
                 <DialogContent dividers>
                     <Typography>ชื่อลูกค้า: <b>{customerName || "ไม่ระบุ"}</b></Typography>
                     <Typography>เบอร์โทรศัพท์: <b>{customerPhone || "ไม่ระบุ"}</b></Typography>
+                    <Typography>ที่อยู่สำหรับจัดส่ง: <b>{customerAddress || "ไม่ระบุ"}</b></Typography>
                     <Table size="small" sx={{ mt: 2 }}>
                         <TableBody>
                             {confirmProducts.map((item) => (
